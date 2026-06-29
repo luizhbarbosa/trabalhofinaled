@@ -1,0 +1,157 @@
+# Sistema de Mapeamento de Rotas para Ambulâncias e Emergências
+> 28 tarefas · 4 fases · Java + Swing
+
+---
+
+## Fase 1 — Fundação: estrutura e modelagem do grafo
+
+### T-01 · Criar classe `Vertice` v
+Tipos: Hospital, Base SAMU, Bairro, Cruzamento, Paciente. Atributos: id, nome, tipo, coordenadas.
+
+### T-02 · Criar classe `Aresta` v
+Atributos: origem, destino, peso (tempo de deslocamento), status da via (livre / bloqueada / congestionada).
+
+### T-03 · Criar classe `GrafoCidade` v
+Armazenar lista de vértices e arestas. Métodos: `addVertice`, `addAresta`, `getVizinhos`, `removerAresta`.
+
+### T-04 · Criar classe `Hospital` v
+Herda de `Vertice`. Atributos de capacidade máxima e ocupação atual. Método `isDisponivel()` — regra de negócio RN02.
+
+### T-05 · Criar classe `Ambulancia` v
+Localização atual e status (disponível / em atendimento). Uma ocorrência por vez — regra de negócio RN01.
+
+### T-06 · Criar classe `Paciente`v
+Localização da ocorrência e nível de urgência.
+
+---
+
+## Fase 2 — Algoritmos: implementação dos algoritmos de grafos
+
+### T-07 · Implementar Dijkstra v
+Menor custo entre dois vértices. Usado em: Ambulância → Paciente e Paciente → Hospital (RF07).
+
+### T-08 · Implementar BFS (Busca em Largura) v
+Caminho com menor número de cruzamentos. Análise estrutural da rede viária e verificação de conectividade.
+
+### T-09 · Implementar A* (`AEstrela`) v
+Heurística para localizar o hospital mais próximo de forma eficiente (RF08).
+
+### T-10 · Implementar Componentes Conexos v
+Identificar regiões isoladas sem acesso a hospitais (RF12).
+
+### T-11 · Lógica de recálculo de rota v
+Detectar bloqueio de via e recalcular automaticamente com Dijkstra (RF10, RN03).
+
+### T-12 · Pesos dinâmicos nas arestas v
+Aumentar peso em vias congestionadas (RN04). Bloquear vias interditadas e reabrir quando liberadas.
+
+---
+
+## Fase 3 — Regras e serviços: requisitos funcionais e lógica de negócio
+
+### T-13 · Cadastrar hospitais (RF01)
+CRUD de hospitais na rede. Validar capacidade antes de selecionar como destino (RN02).
+
+### T-14 · Cadastrar bases do SAMU (RF02)
+Adicionar bases como vértices do tipo Base SAMU no grafo da cidade.
+
+### T-15 · Cadastrar bairros e cruzamentos (RF03)
+Vértices intermediários que compõem a malha urbana.
+
+### T-16 · Cadastrar vias (RF04)
+Arestas com peso (tempo médio de deslocamento). Definir conexões bidirecionais ou unidirecionais.
+
+### T-17 · Registrar ocorrência (RF05)
+Entrada de dados do paciente. Disparar nova análise de rota (RN05).
+
+### T-18 · Localizar ambulância mais próxima (RF06)
+Filtrar ambulâncias disponíveis e aplicar Dijkstra para identificar a mais próxima.
+
+### T-19 · Selecionar hospital destino (RF08)
+Usar A* para encontrar hospital disponível e mais próximo do paciente.
+
+### T-20 · Estimar tempo de chegada (RF11)
+Calcular ETA com base no peso acumulado do caminho retornado por Dijkstra.
+
+### T-21 · Atualizar condições das vias (RF09)
+Alterar peso ou status de uma aresta (bloqueio, obras, congestionamento).
+
+### T-22 · Análise de cobertura — `AnaliseCobertura` (RF12)
+Usar Componentes Conexos para detectar regiões sem acesso hospitalar. Avaliar distância média entre bairros e hospitais.
+
+### T-23 · Orquestrar fluxo de emergência — `SistemaEmergencia`
+Coordenar T-17 a T-22 nas 7 etapas do fluxo: registrar → ambulância → rota → hospital → monitorar → recalcular → cobertura.
+
+---
+
+## Fase 4 — Interface: telas Swing e testes
+
+### T-24 · `TelaPrincipal`
+Exibir mapa da cidade, menus e acesso às funcionalidades. Ponto central do sistema (RNF02).
+
+### T-25 · `TelaCadastroHospital`
+CRUD de hospitais. Consultar e exibir capacidade de atendimento.
+
+### T-26 · `TelaCadastroVia`
+Cadastrar ruas e avenidas. Atualizar pesos e registrar bloqueios e obras.
+
+### T-27 · `TelaAtendimento`
+Registrar chamados, exibir rota calculada, estimativa de tempo e acompanhar o atendimento.
+
+### T-28 · Testes de integração e validação
+Validar RN01–RN05, fluxo completo de emergência e desempenho em redes grandes (RNF04).
+
+---
+
+## Requisitos Não Funcionais
+
+| Código | Requisito |
+|--------|-----------|
+| RNF01 | Sistema desenvolvido em Java. |
+| RNF02 | Interface gráfica com Java Swing. |
+| RNF03 | Arquitetura orientada a objetos. |
+| RNF04 | Desempenho adequado para redes urbanas de grande porte. |
+| RNF05 | Permitir manutenção e expansão futura. |
+
+---
+
+## Regras de Negócio
+
+| Código | Regra |
+|--------|-------|
+| RN01 | Uma ambulância só atende uma ocorrência por vez. |
+| RN02 | Hospitais lotados não podem ser selecionados como destino. |
+| RN03 | Vias bloqueadas não compõem uma rota. |
+| RN04 | Vias congestionadas têm seus pesos aumentados. |
+| RN05 | Toda nova ocorrência gera uma nova análise de rota. |
+
+---
+
+## Fluxo de Funcionamento
+
+1. Operador registra uma emergência.
+2. Sistema identifica a ambulância disponível mais próxima.
+3. Dijkstra calcula a rota da ambulância até o paciente.
+4. Após o atendimento, A* calcula a melhor rota até um hospital.
+5. Sistema monitora alterações nas vias em tempo real.
+6. Caso haja bloqueios, nova rota é calculada automaticamente.
+7. Dados utilizados para análises de cobertura da rede.
+
+---
+
+## Correspondência com a Teoria dos Grafos
+
+| Elemento do sistema | Conceito em grafos |
+|---------------------|--------------------|
+| Hospital | Vértice |
+| Bairro | Vértice |
+| Cruzamento | Vértice |
+| Base SAMU | Vértice |
+| Rua / Avenida | Aresta |
+| Tempo de deslocamento | Peso |
+| Congestionamento | Alteração de peso |
+| Região isolada | Componente desconexo |
+
+---
+
+*Baseado nos documentos: 6.pdf (Mapeamento de Rotas de Ambulâncias) e PaganoSamu_1.pdf*
