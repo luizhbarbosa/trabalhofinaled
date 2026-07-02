@@ -49,37 +49,37 @@ Aumentar peso em vias congestionadas (RN04). Bloquear vias interditadas e reabri
 
 ## Fase 3 — Regras e serviços: requisitos funcionais e lógica de negócio
 
-### T-13 · Cadastrar hospitais (RF01)
+### T-13 · Cadastrar hospitais (RF01) v
 CRUD de hospitais na rede. Validar capacidade antes de selecionar como destino (RN02).
 
-### T-14 · Cadastrar bases do SAMU (RF02)
+### T-14 · Cadastrar bases do SAMU (RF02) v
 Adicionar bases como vértices do tipo Base SAMU no grafo da cidade.
 
-### T-15 · Cadastrar bairros e cruzamentos (RF03)
+### T-15 · Cadastrar bairros e cruzamentos (RF03) v
 Vértices intermediários que compõem a malha urbana.
 
-### T-16 · Cadastrar vias (RF04)
+### T-16 · Cadastrar vias (RF04) v
 Arestas com peso (tempo médio de deslocamento). Definir conexões bidirecionais ou unidirecionais.
 
-### T-17 · Registrar ocorrência (RF05)
+### T-17 · Registrar ocorrência (RF05) v
 Entrada de dados do paciente. Disparar nova análise de rota (RN05).
 
-### T-18 · Localizar ambulância mais próxima (RF06)
+### T-18 · Localizar ambulância mais próxima (RF06) v
 Filtrar ambulâncias disponíveis e aplicar Dijkstra para identificar a mais próxima.
 
-### T-19 · Selecionar hospital destino (RF08)
+### T-19 · Selecionar hospital destino (RF08) v
 Usar A* para encontrar hospital disponível e mais próximo do paciente.
 
-### T-20 · Estimar tempo de chegada (RF11)
+### T-20 · Estimar tempo de chegada (RF11) v
 Calcular ETA com base no peso acumulado do caminho retornado por Dijkstra.
 
-### T-21 · Atualizar condições das vias (RF09)
+### T-21 · Atualizar condições das vias (RF09) v
 Alterar peso ou status de uma aresta (bloqueio, obras, congestionamento).
 
-### T-22 · Análise de cobertura — `AnaliseCobertura` (RF12)
+### T-22 · Análise de cobertura — `AnaliseCobertura` (RF12) v
 Usar Componentes Conexos para detectar regiões sem acesso hospitalar. Avaliar distância média entre bairros e hospitais.
 
-### T-23 · Orquestrar fluxo de emergência — `SistemaEmergencia`
+### T-23 · Orquestrar fluxo de emergência — `SistemaEmergencia` v
 Coordenar T-17 a T-22 nas 7 etapas do fluxo: registrar → ambulância → rota → hospital → monitorar → recalcular → cobertura.
 
 ---

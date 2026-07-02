@@ -1,0 +1,287 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% This project aims to create the UFC template for presentation.                %%
+%% author: Maurício Moreira Neto - Doctoral student in Computer Science (MDCC)   %%
+%% contacts:                                                                     %%
+%%    e-mail: maumneto@ufc.br                                                    %%
+%%    linktree: https://linktr.ee/maumneto                                       %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{libs/ufrb_format}
+% Inserting the preamble file with the packages
+\input{libs/preamble.tex}
+% Inserting the references file
+\bibliography{references.bib}
+
+% Title
+\title[short title]{\huge\textbf{Título da Apresentação}}
+% Subtitle
+\subtitle{Subtítulo da Apresentação}
+% Author of the presentation
+%\author{Nome}
+% Institute's Name
+
+
+\institute[UFRB]{    
+    \begin{flushleft}
+    \textbf{Trabalho de Conclusão de Curso}
+    \newline
+    
+    \textbf{Estudante:} \texttt{nome}
+    \newline
+    
+    \textbf{Orientadores:} \texttt{nome}
+    \newline
+    
+    \textbf{Curso:} \texttt{Bacharelado em Engenharia de Computação}
+    \end{flushleft} 
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Start Document of the Presentation                                           %%               
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+% insert the code style
+\input{libs/code_style}
+
+%% ---------------------------------------------------------------------------
+% First frame (with tile, subtitle, ...)
+\begin{frame}{}
+    \maketitle
+\end{frame}
+
+%% ---------------------------------------------------------------------------
+% Second frame
+\begin{frame}{Sumário}
+    \begin{multicols}{2}
+        \tableofcontents
+    \end{multicols}
+\end{frame}
+
+%% ---------------------------------------------------------------------------
+
+\section{Resumo}
+
+\begin{frame}{Resumo}
+Resumo Resumo Resumo ...
+
+\textbf{Palavras-Chave:} Palavra 1; Palavra 2; Palavra 3; Palavra 4.
+\end{frame}
+
+\section{Introdução}
+\subsection{Contextualização}
+\begin{frame}{Contextualização}
+A Introdução e a justificativa de um projeto de pesquisa deve contextualizar o problema a ser abordado e expressar a relevância do estudo a ser desenvolvido.
+    % itemize
+\end{frame}
+
+
+\subsection{Justificativa}
+\begin{frame}{Justificativa}
+    % itemize
+    A Introdução e a justificativa de um projeto de pesquisa deve contextualizar o problema a ser abordado e expressar a relevância do estudo a ser desenvolvido.
+\end{frame}
+
+\subsection{Objetivo}
+\begin{frame}{Objetivo}
+    % itemize
+O objetivo geral define o que o pesquisador pretende atingir com sua investigação. Os objetivos específicos definem etapas do trabalho a serem realizadas para que se alcance o objetivo geral.
+\end{frame}
+
+\section{Metodologia}
+\subsection{Metodologia}
+\begin{frame}{Metodologia}
+É um planejamento detalhado sobre tudo o que será realizado na sua pesquisa. Deve possuir tal nível de detalhamento que se o projeto for entregue para outra pessoa, ela deve conseguir executar a pesquisa exatamente da mesma forma que você executaria.
+    % itemize
+\end{frame}
+
+
+\section{Impacto}
+\subsection{Impacto}
+\begin{frame}{Impacto}
+Nos impactos do projeto de pesquisa os pesquisadores apresentam os números de artigos publicados, de formação de recursos humanos e outros produtos provenientes da pesquisa. Por detrás dessa resposta está a convicção de que há uma relação de causa e efeito entre a pesquisa publicada e a melhoria de qualidade de vida da comunidade.
+    % itemize
+\end{frame}
+
+\section{Recursos humanos e Cronograma}
+\subsection{Recursos humanos e Cronograma}
+\begin{frame}{Recursos humanos e Cronograma}
+
+    % itemize
+\end{frame}
+
+
+\section{Resultados esperados}
+\subsection{Resultados esperados}
+\begin{frame}{Resultados esperados}
+    Os resultados esperados são a forma concreta para alcançar os objetivos do projeto, portanto deve existir uma correspondência estreita entre esses aspectos.
+    % itemize
+\end{frame}
+
+\section{Resultados Parciais}
+\subsection{Resultados Parciais}
+\begin{frame}{Resultados Parciais}
+    Adicionar gráficos com as métricas obtidas até então, etc. \cite{zhang2010new}.
+
+    Testando citações \cite{einstein} \cite{burkov2019hundred}. 
+    % itemize
+\end{frame}
+
+
+
+%% ---------------------------------------------------------------------------
+% Reference frames
+\begin{frame}[allowframebreaks]
+    \frametitle{Referências}
+    \printbibliography
+\end{frame}
+
+%% ---------------------------------------------------------------------------
+% Final frame
+\begin{frame}{}
+    \centering
+    \huge{\textbf{\example{Obrigado(a) pela Atenção!}}}
+    
+    \vspace{1cm}
+    
+    \Large{\textbf{Contato:}}
+    \newline
+    \vspace*{0.5cm}
+    \large{\email{usuario@dominio}}
+\end{frame}
+
+% This presentation is separated by sections and subsections
+\section{Seção I}
+
+\subsection{Subseção I}
+\begin{frame}{Explicações}
+    % itemize
+    Este é um template que pode ser utilizado para:
+    \begin{itemize}
+        \item Apresentação de Trabalhos Acadêmicos
+        \item Apresentação de Disciplinas
+        \item Apresentações de Teses e Dissertações
+    \end{itemize}
+
+    \vspace{0.4cm} % vertical space
+    
+    % enumeration
+    Para utilizar este template corretamente é importante que:
+    \begin{enumerate}
+        \item Tenha conhecimento mínimo sobre LaTeX
+        \item Ler os comentários no template (explicações)
+        \item Ler o README.md (documentação)
+    \end{enumerate}
+
+    \vspace{0.2cm}
+
+    \example{Este é um texto de exemplo!} \emph{Texto de Ênfase!}
+\end{frame}
+
+%% ---------------------------------------------------------------------------
+\subsection{Subseção I}
+\begin{frame}{Criando Blocos}
+    % Blocks styles
+    \begin{block}{Bloco Padrão}
+        Texto do corpo do bloco.
+    \end{block}
+
+    \begin{alertblock}{Bloco de Alerta}
+        Texto do corpo do bloco.
+    \end{alertblock}
+
+    \begin{exampleblock}{Bloco de Exemplo}
+        Texto do corpo do bloco.
+    \end{exampleblock}   
+\end{frame}
+
+%% ---------------------------------------------------------------------------
+\subsection{Subseção II}
+\begin{frame}{Criando Caixas}
+    \successbox{testando o success box}
+
+    \pause
+
+    \alertbox{testando o alert box}
+
+    \pause
+
+    \simplebox{testando o simple box}
+\end{frame}
+
+%% ---------------------------------------------------------------------------
+\subsection{Subseção III}
+\begin{frame}{Criando Algoritmos (Pseudocódigo)}
+    \begin{algorithm}[H]
+        \SetAlgoLined
+        \LinesNumbered
+        \SetKwInOut{Input}{input}
+        \SetKwInOut{Output}{output}
+        \Input{x: float, y: float}
+        \Output{r: float}
+        \While{True}{
+          r = x + y\;
+          \eIf{r >= 30}{
+           ``O valor de $r$ é maior ou iqual a 10.''\;
+           break\;
+           }{
+           ``O valor de $r$ = '', r\;
+          }
+         } 
+         \caption{Algorithm Example}
+    \end{algorithm}
+\end{frame}
+
+%% ---------------------------------------------------------------------------
+
+\begin{frame}{Inserindo Algoritmos}
+    \lstset{language=Python}
+    \lstinputlisting[language=Python]{code/main.py}
+\end{frame}
+
+%% ---------------------------------------------------------------------------
+\begin{frame}{Inserindo Algoritmos}
+    \lstinputlisting[language=C]{code/source.c}
+\end{frame}
+
+%% ---------------------------------------------------------------------------
+\begin{frame}{Inserindo Algoritmos}
+    \lstinputlisting[language=Java]{code/helloworld.java}
+\end{frame}
+
+%% ---------------------------------------------------------------------------
+\begin{frame}{Inserindo Algoritmos}
+    \lstinputlisting[language=HTML]{code/index.html}
+\end{frame}
+
+%% ---------------------------------------------------------------------------
+% This frame show an example to insert multicolumns
+\section{Multicolunas}
+\begin{frame}{Seção II - Multicolunas}
+    \begin{columns}{}
+        \begin{column}{0.5\textwidth}
+            \justify
+            É possível colocar mais de uma coluna utilizando os comandos de $\backslash$begin\{column\}\{\} e $\backslash$end\{column\}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \justify
+            Porém, o espaçamento deve ser proporcional entre as colunas para que estas colunas não entrem em coflito. O espaçamento é dado pelo segundo argumento do $\backslash$begin.
+        \end{column}
+    \end{columns}    
+\end{frame}
+
+%% ---------------------------------------------------------------------------
+% This frame show an example to insert figures
+\section{Imagens}
+\begin{frame}{Seção III - Figures}
+    \begin{figure}
+        \centering
+        
+        \includegraphics[scale=0.5]{libs/logo_ufrb.png}
+        \caption{Emblema da UFRB.}
+        \source{Obtido pelo site oficial da UFRB}
+        \label{fig:ufc_emblem}
+    \end{figure}
+\end{frame}
+
+
+\end{document}
