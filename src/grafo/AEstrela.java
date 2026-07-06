@@ -63,6 +63,10 @@ public class AEstrela {
      * Encontra o menor caminho entre origem e destino usando o algoritmo A*.
      * A heurística utilizada é a distância euclidiana entre vértices
      * (em km, convertida para minutos assumindo velocidade média de 40 km/h).
+     * <p>
+     * Usa a lista de adjacência do grafo (grafo.getArestasSaida) em vez de percorrer
+     * todas as arestas a cada vértice processado, garantindo complexidade O(E log V)
+     * em vez de O(V×E) (RNF04).
      *
      * @param grafo   o grafo da cidade contendo vértices e arestas
      * @param origem  vértice de origem do caminho
@@ -111,10 +115,8 @@ public class AEstrela {
             // Marca como processado
             fechados.add(atual);
 
-            // Explora arestas saindo do vértice atual
-            for (Aresta aresta : grafo.getArestas()) {
-                if (!aresta.getOrigem().equals(atual)) continue;
-
+            // Explora apenas as arestas que partem do vértice atual (lista de adjacência)
+            for (Aresta aresta : grafo.getArestasSaida(atual)) {
                 double pesoEfetivo = aresta.getPesoEfetivo();
 
                 // Ignora vias bloqueadas
@@ -148,66 +150,4 @@ public class AEstrela {
      *
      * @param grafo    o grafo da cidade
      * @param origem   vértice de origem (ex: localização do paciente)
-     * @param hospitais lista de hospitais candidatos
-     * @return Resultado com o caminho até o hospital mais próximo disponível,
-     *         ou caminho vazio se nenhum hospital estiver disponível/acessível
-     */
-    public static Resultado encontrarHospitalMaisProximo(GrafoCidade grafo, Vertice origem, List<Hospital> hospitais) {
-        if (grafo == null || origem == null || hospitais == null || hospitais.isEmpty()) {
-            return new Resultado(Collections.emptyList(), Double.POSITIVE_INFINITY);
-        }
-
-        Resultado melhor = new Resultado(Collections.emptyList(), Double.POSITIVE_INFINITY);
-
-        for (Hospital hospital : hospitais) {
-            // RN02: ignora hospitais lotados
-            if (!hospital.isDisponivel()) continue;
-
-            Resultado resultado = encontrarMenorCaminho(grafo, origem, hospital);
-
-            if (resultado.temCaminho() && resultado.getCustoTotal() < melhor.getCustoTotal()) {
-                melhor = resultado;
-            }
-        }
-
-        return melhor;
-    }
-
-    /**
-     * Heurística admissível: estimativa do custo restante até o destino.
-     * Usa distância euclidiana convertida para minutos (velocidade média 40 km/h).
      *
-     * h(n) = distancia_km(n, destino) / 40 * 60
-     *
-     * @param vertice  vértice atual
-     * @param destino  vértice de destino
-     * @return estimativa do custo em minutos
-     */
-    private static double heuristica(Vertice vertice, Vertice destino) {
-        double distanciaKm = vertice.calcularDistancia(destino);
-        // Converte km para minutos assumindo velocidade média de 40 km/h
-        return (distanciaKm / 40.0) * 60.0;
-    }
-
-    /**
-     * Reconstrói o caminho percorrendo os predecessores do destino até a origem.
-     *
-     * @param origem        vértice de origem
-     * @param destino       vértice de destino
-     * @param predecessores mapa de predecessores
-     * @param custoTotal    custo total do caminho
-     * @return Resultado contendo o caminho e o custo total
-     */
-    private static Resultado reconstruirCaminho(Vertice origem, Vertice destino,
-                                                 Map<Vertice, Vertice> predecessores,
-                                                 double custoTotal) {
-        List<Vertice> caminho = new ArrayList<>();
-        Vertice atual = destino;
-        while (atual != null) {
-            caminho.add(atual);
-            atual = predecessores.get(atual);
-        }
-        Collections.reverse(caminho);
-        return new Resultado(caminho, custoTotal);
-    }
-}

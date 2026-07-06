@@ -62,6 +62,10 @@ public class Dijkstra {
      * <p>
      * O algoritmo considera o peso efetivo das arestas, que pode ser infinito para
      * vias bloqueadas ou multiplicado para vias congestionadas.
+     * <p>
+     * Usa a lista de adjacência do grafo (grafo.getArestasSaida) em vez de percorrer
+     * todas as arestas a cada vértice processado, garantindo complexidade O(E log V)
+     * em vez de O(V×E) (RNF04).
      *
      * @param grafo    o grafo da cidade contendo vértices e arestas
      * @param origem   vértice de origem do caminho
@@ -112,26 +116,23 @@ public class Dijkstra {
                 break;
             }
 
-            // Explora todos os vizinhos do vértice atual
-            for (Aresta aresta : grafo.getArestas()) {
-                // Considera apenas arestas que partem do vértice atual
-                if (aresta.getOrigem().equals(atual)) {
-                    Vertice vizinho = aresta.getDestino();
-                    double pesoEfetivo = aresta.getPesoEfetivo();
+            // Explora apenas as arestas que partem do vértice atual (lista de adjacência)
+            for (Aresta aresta : grafo.getArestasSaida(atual)) {
+                Vertice vizinho = aresta.getDestino();
+                double pesoEfetivo = aresta.getPesoEfetivo();
 
-                    // Ignora vias bloqueadas (peso infinito)
-                    if (pesoEfetivo == Double.POSITIVE_INFINITY) {
-                        continue;
-                    }
+                // Ignora vias bloqueadas (peso infinito)
+                if (pesoEfetivo == Double.POSITIVE_INFINITY) {
+                    continue;
+                }
 
-                    double novaDistancia = distancias.get(atual) + pesoEfetivo;
+                double novaDistancia = distancias.get(atual) + pesoEfetivo;
 
-                    // Se encontramos um caminho mais curto para o vizinho, atualizamos
-                    if (novaDistancia < distancias.get(vizinho)) {
-                        distancias.put(vizinho, novaDistancia);
-                        predecessores.put(vizinho, atual);
-                        filaPrioridade.add(new AbstractMap.SimpleEntry<>(vizinho, novaDistancia));
-                    }
+                // Se encontramos um caminho mais curto para o vizinho, atualizamos
+                if (novaDistancia < distancias.get(vizinho)) {
+                    distancias.put(vizinho, novaDistancia);
+                    predecessores.put(vizinho, atual);
+                    filaPrioridade.add(new AbstractMap.SimpleEntry<>(vizinho, novaDistancia));
                 }
             }
         }

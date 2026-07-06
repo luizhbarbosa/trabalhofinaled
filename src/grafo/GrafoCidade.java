@@ -21,12 +21,6 @@ public class GrafoCidade {
         this.adjacencias = new HashMap<>();
     }
 
-    /**
-     * Adiciona um vértice ao grafo.
-     *
-     * @param vertice vértice a ser adicionado
-     * @return true se o vértice foi adicionado, false se já existia
-     */
     public boolean addVertice(Vertice vertice) {
         if (vertice == null || vertices.containsKey(vertice.getId())) {
             return false;
@@ -36,12 +30,6 @@ public class GrafoCidade {
         return true;
     }
 
-    /**
-     * Adiciona uma aresta ao grafo.
-     *
-     * @param aresta aresta a ser adicionada
-     * @return true se a aresta foi adicionada com sucesso
-     */
     public boolean addAresta(Aresta aresta) {
         if (aresta == null) {
             return false;
@@ -62,8 +50,7 @@ public class GrafoCidade {
     }
 
     /**
-     * Retorna a lista de vizinhos diretos de um vértice.
-     * Vizinhos são os destinos de arestas cuja origem é o vértice informado.
+     * Retorna a lista de vizinhos diretos de um vértice (ignora vias bloqueadas).
      *
      * @param vertice vértice de origem
      * @return lista de vértices vizinhos
@@ -79,11 +66,19 @@ public class GrafoCidade {
     }
 
     /**
-     * Remove uma aresta do grafo.
+     * Retorna as arestas que partem de um vértice (lista de adjacência).
+     * Usado pelos algoritmos de busca para evitar percorrer todas as arestas do grafo.
      *
-     * @param aresta aresta a ser removida
-     * @return true se a aresta foi removida, false caso contrário
+     * @param vertice vértice de origem
+     * @return lista de arestas que saem do vértice, ou lista vazia se o vértice não existir
      */
+    public List<Aresta> getArestasSaida(Vertice vertice) {
+        if (vertice == null || !adjacencias.containsKey(vertice.getId())) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(adjacencias.get(vertice.getId()));
+    }
+
     public boolean removerAresta(Aresta aresta) {
         if (aresta == null || !arestas.contains(aresta)) {
             return false;
@@ -96,19 +91,6 @@ public class GrafoCidade {
         return removido;
     }
 
-    /**
-     * Retorna uma cópia da lista de vértices do grafo.
-     *
-     * @return lista de vértices
-     */
-    /**
-     * Encontra o caminho com o menor número de arestas entre dois vértices usando o algoritmo BFS.
-     * Este método é um wrapper para o algoritmo BFS implementado na classe `BFS`.
-     *
-     * @param origem   vértice de origem do caminho
-     * @param destino  vértice de destino do caminho
-     * @return Resultado contendo o caminho e o número de arestas, ou caminho vazio se não existir rota
-     */
     public BFS.Resultado encontrarCaminhoBFS(Vertice origem, Vertice destino) {
         return BFS.encontrarMenorCaminhoBFS(this, origem, destino);
     }
@@ -117,21 +99,10 @@ public class GrafoCidade {
         return new ArrayList<>(vertices.values());
     }
 
-    /**
-     * Retorna uma cópia da lista de arestas do grafo.
-     *
-     * @return lista de arestas
-     */
     public List<Aresta> getArestas() {
         return new ArrayList<>(arestas);
     }
 
-    /**
-     * Tenta localizar um vértice pelo seu id.
-     *
-     * @param id identificador do vértice
-     * @return o vértice ou null se não existir
-     */
     public Vertice getVerticePorId(int id) {
         return vertices.get(id);
     }
