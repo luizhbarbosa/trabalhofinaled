@@ -73,8 +73,8 @@ public List<Hospital> getHospitais() {
     List<Hospital> hospitais = new ArrayList<>();
 
     for (Vertice v : vertices.values()) {
-        if (v instanceof Hospital) {
-            hospitais.add((Hospital) v);
+        if (v instanceof Hospital hospital) {
+            hospitais.add(hospital);
         }
     }
 

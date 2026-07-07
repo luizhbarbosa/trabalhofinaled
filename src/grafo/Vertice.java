@@ -5,7 +5,7 @@ package grafo;
  * Um vértice pode ser um hospital, base SAMU, bairro, cruzamento ou ponto de paciente.
  */
 public class Vertice {
-    private int id;
+    private final int id;
     private String nome;
     private TipoVertice tipo;
     private double latitude;
