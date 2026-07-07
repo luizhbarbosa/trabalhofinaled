@@ -64,7 +64,22 @@ public class GrafoCidade {
                 .map(Aresta::getDestino)
                 .collect(Collectors.toList());
     }
+/**
+ * Retorna todos os hospitais cadastrados no grafo.
+ *
+ * @return lista de hospitais
+ */
+public List<Hospital> getHospitais() {
+    List<Hospital> hospitais = new ArrayList<>();
 
+    for (Vertice v : vertices.values()) {
+        if (v instanceof Hospital) {
+            hospitais.add((Hospital) v);
+        }
+    }
+
+    return hospitais;
+}
     /**
      * Retorna as arestas que partem de um vértice (lista de adjacência).
      * Usado pelos algoritmos de busca para evitar percorrer todas as arestas do grafo.

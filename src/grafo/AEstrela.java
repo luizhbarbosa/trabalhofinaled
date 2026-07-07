@@ -151,3 +151,81 @@ public class AEstrela {
      * @param grafo    o grafo da cidade
      * @param origem   vértice de origem (ex: localização do paciente)
      *
+      */
+     public static Resultado encontrarHospitalMaisProximo(
+        GrafoCidade grafo,
+        Paciente paciente,
+        List<Hospital> hospitais) {
+
+    if (grafo == null || paciente == null || hospitais == null || hospitais.isEmpty()) {
+        return new Resultado(Collections.emptyList(), Double.POSITIVE_INFINITY);
+    }
+
+    Resultado melhorResultado =
+            new Resultado(Collections.emptyList(), Double.POSITIVE_INFINITY);
+
+    for (Hospital hospital : hospitais) {
+
+        if (!hospital.isDisponivel()) {
+            continue;
+        }
+
+        Resultado resultado = encontrarMenorCaminho(grafo, paciente, hospital);
+
+        if (resultado.temCaminho()
+                && resultado.getCustoTotal() < melhorResultado.getCustoTotal()) {
+            melhorResultado = resultado;
+        }
+    }
+
+    return melhorResultado;
+    } // <--- Adicione esta chave de fechamento para fechar o método encontrarHospitalMaisProximo
+
+    private static Resultado reconstruirCaminho(
+        Vertice origem,
+        Vertice destino,
+        Map<Vertice, Vertice> predecessores,
+        double custoTotal) {
+
+    List<Vertice> caminho = new ArrayList<>();
+
+    Vertice atual = destino;
+
+    while (atual != null) {
+        caminho.add(atual);
+
+        if (atual.equals(origem)) {
+            break;
+        }
+
+        atual = predecessores.get(atual);
+    }
+
+    Collections.reverse(caminho);
+
+    if (caminho.isEmpty() || !caminho.get(0).equals(origem)) {
+        return new Resultado(Collections.emptyList(), Double.POSITIVE_INFINITY);
+    }
+
+    return new Resultado(caminho, custoTotal);
+}
+/**
+ * Heurística do algoritmo A*.
+ * Estima o custo restante usando a distância euclidiana entre os vértices.
+ * A distância é convertida para minutos assumindo velocidade média de 40 km/h.
+ *
+ * @param atual vértice atual
+ * @param destino vértice destino
+ * @return estimativa de custo até o destino
+ */
+private static double heuristica(Vertice atual, Vertice destino) {
+    if (atual == null || destino == null) {
+        return Double.POSITIVE_INFINITY;
+    }
+
+    double distanciaKm = atual.calcularDistancia(destino);
+
+    // velocidade média = 40 km/h
+    return (distanciaKm / 40.0) * 60.0;
+}
+}
