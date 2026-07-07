@@ -18,33 +18,41 @@ public class Main {
         SeedDados.popular(sistema);
 
         // ==================== Etapa 1: Registrar ocorrencia ====================
+        // registrarOcorrencia() agora garante RN05 automaticamente: conecta o
+        // paciente ao grafo, localiza ambulancia, calcula rota e seleciona
+        // hospital em uma unica chamada.
 
         System.out.println("\n-------------------------------------------");
         System.out.println("ETAPA 1 - Registrando ocorrencia...");
 
         Paciente paciente = new Paciente(99, "Joao Silva", -12.962, -38.497,
                 NivelUrgencia.ALTA, "Dor no peito intensa");
-        sistema.registrarOcorrencia(paciente);
 
-        // Conecta o paciente ao cruzamento mais proximo
-        Vertice cruzA = grafo.getVerticePorId(30);
-        sistema.cadastrarVia(new Aresta(cruzA,   paciente, 1.5));
-        sistema.cadastrarVia(new Aresta(paciente, cruzA,   1.5));
+        SistemaEmergencia.AtendimentoResultado atendimento = sistema.registrarOcorrencia(paciente);
+
+        if (atendimento == null) {
+            System.out.println("ERRO: Falha ao registrar ocorrencia (paciente invalido ou id duplicado).");
+            return;
+        }
 
         System.out.println("OK Paciente: " + paciente.getNome()
                 + " | Urgencia: " + paciente.getNivelUrgencia().getDescricao()
                 + " | Ocorrencia: " + paciente.getDescricaoOcorrencia());
+        System.out.println("  " + atendimento.getMensagem());
 
-        // ==================== Etapa 2: Localizar ambulancia ====================
-
-        System.out.println("\n-------------------------------------------");
-        System.out.println("ETAPA 2 - Localizando ambulancia mais proxima...");
-
-        Ambulancia ambulancia = sistema.localizarAmbulanciaProxima(paciente);
-        if (ambulancia == null) {
-            System.out.println("ERRO: Nenhuma ambulancia disponivel!");
+        if (!atendimento.isSucesso()) {
+            System.out.println("ERRO: " + atendimento.getMensagem());
             return;
         }
+
+        Ambulancia ambulancia = atendimento.getAmbulancia();
+        Dijkstra.Resultado rotaAmbulancia = atendimento.getRotaAmbulancia();
+        AEstrela.Resultado rotaHospital = atendimento.getRotaHospital();
+
+        // ==================== Etapa 2: Ambulancia localizada ====================
+
+        System.out.println("\n-------------------------------------------");
+        System.out.println("ETAPA 2 - Ambulancia localizada...");
         System.out.println("OK Ambulancia #" + ambulancia.getId()
                 + " em " + ambulancia.getLocalizacaoAtual().getNome());
 
@@ -53,11 +61,6 @@ public class Main {
         System.out.println("\n-------------------------------------------");
         System.out.println("ETAPA 3 - Rota ambulancia -> paciente (Dijkstra)...");
 
-        Dijkstra.Resultado rotaAmbulancia = sistema.calcularRotaAmbulanciaParaPaciente(ambulancia, paciente);
-        if (!rotaAmbulancia.temCaminho()) {
-            System.out.println("ERRO: Sem rota ate o paciente!");
-            return;
-        }
         imprimirCaminho(rotaAmbulancia.getCaminho());
         System.out.println("  ETA: " + sistema.estimarTempoChegada(rotaAmbulancia.getCustoTotal()));
         sistema.despacharAmbulancia(ambulancia);
@@ -68,7 +71,6 @@ public class Main {
         System.out.println("\n-------------------------------------------");
         System.out.println("ETAPA 4 - Hospital destino (A*)...");
 
-        AEstrela.Resultado rotaHospital = sistema.selecionarHospitalDestino(paciente);
         if (!rotaHospital.temCaminho()) {
             System.out.println("ERRO: Nenhum hospital disponivel!");
         } else {

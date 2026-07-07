@@ -130,23 +130,130 @@ public class SistemaEmergencia {
     // ==================== Fluxo de Emergência ====================
 
     /**
-     * Etapa 1 — Registra uma ocorrência de emergência (RF05, RN05).
-     * Adiciona o paciente ao grafo e à lista de pacientes.
+     * Conecta um paciente ao vértice mais próximo do grafo (RN05, T-09).
+     * Cria arestas bidirecionais entre o paciente e o vértice mais próximo
+     * (ignorando outros pacientes como candidato), com peso estimado pela
+     * mesma heurística de velocidade média usada no A* (40 km/h).
+     * Necessário para que Dijkstra/A* consigam alcançar o paciente.
      *
-     * @param paciente paciente com localização e nível de urgência
-     * @return true se registrado com sucesso
+     * @param paciente paciente a ser conectado
+     * @return true se a conexão foi criada com sucesso
      */
-    public boolean registrarOcorrencia(Paciente paciente) {
+    public boolean conectarPacienteAoVerticeMaisProximo(Paciente paciente) {
         if (paciente == null) return false;
-        boolean adicionado = grafo.addVertice(paciente);
-        if (adicionado) {
-            pacientes.add(paciente);
+
+        Vertice maisProximo = null;
+        double menorDistancia = Double.POSITIVE_INFINITY;
+
+        for (Vertice v : grafo.getVertices()) {
+            if (v.equals(paciente) || v instanceof Paciente) continue;
+            double distancia = paciente.calcularDistancia(v);
+            if (distancia < menorDistancia) {
+                menorDistancia = distancia;
+                maisProximo = v;
+            }
         }
-        return adicionado;
+
+        if (maisProximo == null) return false;
+
+        double tempoEstimado = (menorDistancia / 40.0) * 60.0; // minutos, 40 km/h
+        boolean ida = grafo.addAresta(new Aresta(maisProximo, paciente, tempoEstimado));
+        boolean volta = grafo.addAresta(new Aresta(paciente, maisProximo, tempoEstimado));
+        return ida && volta;
     }
 
     /**
-     * Etapa 2 — Localiza a ambulância disponível mais próxima do paciente (RF06).
+     * Encapsula o resultado completo do atendimento a uma nova ocorrência (RN05):
+     * ambulância designada, rota até o paciente e hospital de destino selecionado.
+     */
+    public static class AtendimentoResultado {
+        private final Paciente paciente;
+        private final Ambulancia ambulancia;
+        private final Dijkstra.Resultado rotaAmbulancia;
+        private final AEstrela.Resultado rotaHospital;
+        private final String mensagem;
+
+        public AtendimentoResultado(Paciente paciente, Ambulancia ambulancia,
+                                     Dijkstra.Resultado rotaAmbulancia,
+                                     AEstrela.Resultado rotaHospital, String mensagem) {
+            this.paciente = paciente;
+            this.ambulancia = ambulancia;
+            this.rotaAmbulancia = rotaAmbulancia;
+            this.rotaHospital = rotaHospital;
+            this.mensagem = mensagem;
+        }
+
+        public Paciente getPaciente() { return paciente; }
+        public Ambulancia getAmbulancia() { return ambulancia; }
+        public Dijkstra.Resultado getRotaAmbulancia() { return rotaAmbulancia; }
+        public AEstrela.Resultado getRotaHospital() { return rotaHospital; }
+        public String getMensagem() { return mensagem; }
+
+        public boolean isSucesso() {
+            return ambulancia != null && rotaAmbulancia != null && rotaAmbulancia.temCaminho();
+        }
+    }
+
+    /**
+     * Orquestra a análise de rota completa para uma nova ocorrência (RN05):
+     * localizar ambulância → calcular rota até o paciente → selecionar hospital.
+     * Chamado automaticamente por registrarOcorrencia(), garantindo a regra de negócio
+     * independentemente de quem invoca o sistema.
+     *
+     * @param paciente paciente recém-registrado
+     * @return resultado consolidado do atendimento
+     */
+    public AtendimentoResultado atenderNovaOcorrencia(Paciente paciente) {
+        Dijkstra.Resultado semRota = new Dijkstra.Resultado(Collections.emptyList(), Double.POSITIVE_INFINITY);
+        AEstrela.Resultado semHospital = new AEstrela.Resultado(Collections.emptyList(), Double.POSITIVE_INFINITY);
+
+        if (paciente == null) {
+            return new AtendimentoResultado(null, null, semRota, semHospital, "Paciente inválido.");
+        }
+
+        Ambulancia ambulancia = localizarAmbulanciaProxima(paciente);
+        if (ambulancia == null) {
+            return new AtendimentoResultado(paciente, null, semRota, semHospital,
+                    "Nenhuma ambulância disponível no momento.");
+        }
+
+        Dijkstra.Resultado rotaAmbulancia = calcularRotaAmbulanciaParaPaciente(ambulancia, paciente);
+        if (!rotaAmbulancia.temCaminho()) {
+            return new AtendimentoResultado(paciente, ambulancia, rotaAmbulancia, semHospital,
+                    "Ambulância localizada, mas sem rota possível até o paciente.");
+        }
+
+        AEstrela.Resultado rotaHospital = selecionarHospitalDestino(paciente);
+        String mensagem = rotaHospital.temCaminho()
+                ? "Ocorrência atendida: ambulância e hospital designados."
+                : "Rota até o paciente calculada, mas nenhum hospital disponível/alcançável.";
+
+        return new AtendimentoResultado(paciente, ambulancia, rotaAmbulancia, rotaHospital, mensagem);
+    }
+
+    /**
+     * Etapa 1 — Registra uma ocorrência de emergência (RF05, RN05).
+     * Adiciona o paciente ao grafo, conecta-o automaticamente ao vértice mais próximo,
+     * e dispara a análise de rota completa (ambulância + hospital) — a regra de negócio
+     * RN05 deixa de depender do código-cliente e passa a ser garantida aqui.
+     *
+     * @param paciente paciente com localização e nível de urgência
+     * @return resultado do atendimento, ou null se o paciente não pôde ser registrado
+     */
+    public AtendimentoResultado registrarOcorrencia(Paciente paciente) {
+        if (paciente == null) return null;
+
+        boolean adicionado = grafo.addVertice(paciente);
+        if (!adicionado) return null;
+
+        pacientes.add(paciente);
+        conectarPacienteAoVerticeMaisProximo(paciente);
+
+        return atenderNovaOcorrencia(paciente);
+    }
+
+    /**
+     * Localiza a ambulância disponível mais próxima do paciente (RF06).
      * Aplica Dijkstra de cada ambulância disponível até o paciente e retorna a mais próxima.
      *
      * @param paciente paciente que precisa de atendimento
@@ -174,7 +281,7 @@ public class SistemaEmergencia {
     }
 
     /**
-     * Etapa 3 — Calcula a rota da ambulância até o paciente usando Dijkstra (RF07).
+     * Calcula a rota da ambulância até o paciente usando Dijkstra (RF07).
      *
      * @param ambulancia ambulância despachada
      * @param paciente   paciente a ser atendido
@@ -188,7 +295,7 @@ public class SistemaEmergencia {
     }
 
     /**
-     * Etapa 4 — Seleciona o hospital disponível mais próximo do paciente usando A* (RF08, RN02).
+     * Seleciona o hospital disponível mais próximo do paciente usando A* (RF08, RN02).
      *
      * @param paciente paciente a ser transportado
      * @return resultado do A* com caminho até o hospital mais próximo disponível
@@ -201,7 +308,7 @@ public class SistemaEmergencia {
     }
 
     /**
-     * Etapa 5 — Estima o tempo de chegada (ETA) com base no custo do caminho (RF11).
+     * Estima o tempo de chegada (ETA) com base no custo do caminho (RF11).
      * O custo já representa minutos — este método formata para exibição.
      *
      * @param custoEmMinutos custo total do caminho em minutos
@@ -221,7 +328,7 @@ public class SistemaEmergencia {
     }
 
     /**
-     * Etapa 6 — Recalcula a rota em caso de bloqueio de via (RF10, RN03).
+     * Recalcula a rota em caso de bloqueio de via (RF10, RN03).
      *
      * @param aresta       via bloqueada
      * @param rotaAtual    rota em uso no momento do bloqueio
@@ -235,7 +342,7 @@ public class SistemaEmergencia {
     }
 
     /**
-     * Etapa 7 — Analisa a cobertura da rede (RF12).
+     * Analisa a cobertura da rede (RF12).
      * Identifica regiões sem acesso hospitalar usando Componentes Conexos.
      *
      * @return resultado da análise de componentes conexos
