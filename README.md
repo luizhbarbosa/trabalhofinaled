@@ -125,12 +125,4 @@ Depois disso, o fluxo segue com:
 
 ---
 
-## 9. Por onde um novo dev deve começar a ler o código
 
-Sugestão de ordem, de baixo pra cima (igual foi construído):
-
-1. `Vertice.java` / `Aresta.java` / `TipoVertice.java` / `StatusVia.java` — os blocos básicos
-2. `GrafoCidade.java` — a estrutura de dados central
-3. `Dijkstra.java` / `AEstrela.java` / `BFS.java` / `ComponentesConexos.java` — os algoritmos, isolados e testáveis por conta própria
-4. `SistemaEmergencia.java` — onde tudo se conecta; é o arquivo mais importante pra entender o fluxo de negócio
-5. `Main.java` — exemplo de uso ponta a ponta, bom pra ver o sistema "vivo" rodando
