@@ -27,11 +27,12 @@ public class SistemaEmergencia {
      *
      * @param grafo o grafo da cidade
      */
-    public SistemaEmergencia(GrafoCidade grafo) {
-        this.grafo = grafo;
+    public SistemaEmergencia() {
+        this.grafo = new GrafoCidade();
         this.ambulancias = new ArrayList<>();
         this.hospitais = new ArrayList<>();
         this.pacientes = new ArrayList<>();
+        
     }
 
     // ==================== Cadastros (T-13 a T-16) ====================
@@ -157,8 +158,8 @@ public class SistemaEmergencia {
         if (maisProximo == null) return false;
 
         double tempoEstimado = (menorDistancia / 40.0) * 60.0; // minutos, 40 km/h
-        boolean ida = grafo.addAresta(new Aresta(maisProximo, paciente, tempoEstimado));
-        boolean volta = grafo.addAresta(new Aresta(paciente, maisProximo, tempoEstimado));
+        boolean ida = grafo.addAresta(new Aresta(maisProximo, paciente, tempoEstimado, StatusVia.LIVRE));
+        boolean volta = grafo.addAresta(new Aresta(paciente, maisProximo, tempoEstimado, StatusVia.LIVRE));
         return ida && volta;
     }
 
@@ -428,10 +429,15 @@ public class SistemaEmergencia {
      * @return resultado da operação
      */
     public GerenciadorVias.Resultado atualizarStatusVia(Aresta aresta, StatusVia novoStatus) {
-        return switch (novoStatus) {
-            case BLOQUEADA -> GerenciadorVias.bloquearVia(grafo, aresta);
-            case CONGESTIONADA -> GerenciadorVias.congestionarVia(grafo, aresta);
-            case LIVRE -> GerenciadorVias.liberarVia(grafo, aresta);
-        };
+        switch (novoStatus) {
+            case BLOQUEADA:
+                return GerenciadorVias.bloquearVia(grafo, aresta);
+            case CONGESTIONADA:
+                return GerenciadorVias.congestionarVia(grafo, aresta);
+            case LIVRE:
+                return GerenciadorVias.liberarVia(grafo, aresta);
+            default:
+                return null;
+        }
     }
 }
