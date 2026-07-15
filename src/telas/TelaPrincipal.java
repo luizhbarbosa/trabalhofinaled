@@ -9,7 +9,6 @@ import grafo.RecalculoRota;
 import grafo.SeedDados;
 import grafo.SistemaEmergencia;
 import grafo.Vertice;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -17,7 +16,6 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.*;
 import javax.swing.text.*;
 
@@ -406,7 +404,7 @@ public class TelaPrincipal extends JFrame {
             boolean adicionou = mapa.getGrafo().addVertice(h);
             boolean registrouNoSistema = sistema.cadastrarHospital(h);
 
-            if (adicionou) {
+            if (registrouNoSistema) {
                 Vertice maisProximo = null;
                 double menorDistancia = Double.MAX_VALUE;
 
