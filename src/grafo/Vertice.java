@@ -139,10 +139,10 @@ public class Vertice {
                 '}';
     }
 
-   @Override
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || !(o instanceof Vertice)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         Vertice vertice = (Vertice) o;
         return id == vertice.id;
     }
@@ -152,4 +152,3 @@ public class Vertice {
         return Integer.hashCode(id);
     }
 }
-
