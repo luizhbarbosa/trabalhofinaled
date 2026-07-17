@@ -28,11 +28,19 @@ public class SistemaEmergencia {
      * @param grafo o grafo da cidade
      */
     public SistemaEmergencia() {
-        this.grafo = new GrafoCidade();
+        this(new GrafoCidade());
+    }
+
+    /**
+     * Construtor do sistema de emergência usando um grafo existente.
+     *
+     * @param grafo o grafo da cidade
+     */
+    public SistemaEmergencia(GrafoCidade grafo) {
+        this.grafo = grafo != null ? grafo : new GrafoCidade();
         this.ambulancias = new ArrayList<>();
         this.hospitais = new ArrayList<>();
         this.pacientes = new ArrayList<>();
-        
     }
 
     // ==================== Cadastros (T-13 a T-16) ====================
@@ -124,6 +132,11 @@ public class SistemaEmergencia {
      */
     public boolean cadastrarAmbulancia(Ambulancia ambulancia) {
         if (ambulancia == null) return false;
+        for (Ambulancia existente : ambulancias) {
+            if (existente.getId() == ambulancia.getId()) {
+                return false;
+            }
+        }
         ambulancias.add(ambulancia);
         return true;
     }
@@ -234,7 +247,7 @@ public class SistemaEmergencia {
                     "VIAS BLOQUEADAS: Nenhuma alternativa encontrada para o destino.");
         }
 
-AEstrela.Resultado rotaHospital = selecionarHospitalDestino(paciente);
+        AEstrela.Resultado rotaHospital = selecionarHospitalDestino(paciente);
 
         String mensagem;
         if (rotaHospital.temCaminho()) {
@@ -257,6 +270,7 @@ AEstrela.Resultado rotaHospital = selecionarHospitalDestino(paciente);
         }
 
         return new AtendimentoResultado(paciente, ambulancia, rotaAmbulancia, rotaHospital, mensagem);
+    }
 
     /**
      * Etapa 1 — Registra uma ocorrência de emergência (RF05, RN05).

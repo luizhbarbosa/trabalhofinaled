@@ -9,7 +9,6 @@ import grafo.RecalculoRota;
 import grafo.SeedDados;
 import grafo.SistemaEmergencia;
 import grafo.Vertice;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -17,7 +16,6 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.*;
 import javax.swing.text.*;
 
@@ -178,7 +176,7 @@ public class TelaPrincipal extends JFrame {
     }
 
     // 2. Método principal atualizado
-    public void animarDespacho(Ambulancia amb, java.util.List<Vertice> rotaCompleta, boolean destacarRota, Runnable aoTerminar) {
+   public void animarDespacho(Ambulancia amb, java.util.List<Vertice> rotaCompleta, boolean destacarRota, Runnable aoTerminar) {
         if (rotaCompleta == null || rotaCompleta.size() < 2) {
             if (aoTerminar != null) aoTerminar.run();
             return;
@@ -193,13 +191,11 @@ public class TelaPrincipal extends JFrame {
         }
 
         javax.swing.Timer timer = new javax.swing.Timer(25, null);
-        boolean[] pacienteRemovido = {false};
 
         timer.addActionListener(new java.awt.event.ActionListener() {
             int indiceTrecho = 0;
             double progresso = 0.0;
             final double VELOCIDADE = 0.05;
-            final int indicePaciente = (localPaciente != null) ? rotaCompleta.indexOf(localPaciente) : -1;
 
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -211,13 +207,6 @@ public class TelaPrincipal extends JFrame {
 
                 amb.setPosicaoVisual(latAtual, lonAtual);
                 mapa.repaint();
-
-                // Remove o bonequinho quando a ambulância passa pelo paciente
-                if (!pacienteRemovido[0] && indicePaciente >= 0 && indiceTrecho >= indicePaciente) {
-                    pacienteRemovido[0] = true;
-                    mapa.removerPaciente(localPaciente);
-                    adicionarLog("🚑 Ambulância #" + amb.getId() + " chegou ao paciente. Seguindo para o hospital...", "info");
-                }
 
                 progresso += VELOCIDADE;
 
@@ -242,6 +231,18 @@ public class TelaPrincipal extends JFrame {
         });
 
         timer.start();
+    }
+
+    private Vertice encontrarPacienteNaRota(java.util.List<Vertice> rotaCompleta) {
+        if (rotaCompleta == null) {
+            return null;
+        }
+        for (Vertice vertice : rotaCompleta) {
+            if (vertice instanceof grafo.Paciente) {
+                return vertice;
+            }
+        }
+        return null;
     }
 
     // ==========================================================
@@ -391,7 +392,11 @@ public class TelaPrincipal extends JFrame {
         adicionarLog("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "titulo");
         adicionarLog("🚀 INICIANDO SIMULAÇÃO", "titulo");
         
-        SeedDados.popular(sistema);
+        if (sistema.getGrafo().getVertices().isEmpty() && sistema.getAmbulancias().isEmpty()) {
+            SeedDados.popular(sistema);
+        } else {
+            adicionarLog("ℹ️ Simulação já carregada. Dados existentes mantidos.", "info");
+        }
         
         this.ambulancias = sistema.getAmbulancias();
         mapa.setGrafo(sistema.getGrafo());

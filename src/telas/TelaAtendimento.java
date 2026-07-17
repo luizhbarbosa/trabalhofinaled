@@ -9,11 +9,10 @@ import grafo.Paciente;
 import grafo.SistemaEmergencia;
 import grafo.TipoVertice;
 import grafo.Vertice;
-
-import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.*;
 
 public class TelaAtendimento extends JDialog {
 
@@ -364,10 +363,8 @@ telaPrincipal.animarDespacho(ambulanciaEscolhida, rotaCompleta, () -> {
                 telaPrincipal.adicionarLog("🔄 Ambulância #" + ambFinal.getId() + " retornando à base: " + baseOrigemFinal.getNome(), "info");
                 telaPrincipal.adicionarLog("   ⏱️ ETA de retorno: ~" + etaVolta, "info");
                 
-                // Remove o destaque azul da rota antes de iniciar o retorno
-                telaPrincipal.getMapa().setRotaDestacada(null);
-                
-                telaPrincipal.animarDespacho(ambFinal, rotaVolta.getCaminho(), () -> {
+                // O "false" evita trocar a rota azul durante o retorno.
+                telaPrincipal.animarDespacho(ambFinal, rotaVolta.getCaminho(), false, () -> {
                     ambFinal.setLocalizacaoAtual(baseOrigemFinal);
                     ambFinal.finalizarAtendimento();
                     
