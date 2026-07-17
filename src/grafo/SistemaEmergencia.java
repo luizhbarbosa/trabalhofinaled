@@ -231,10 +231,11 @@ public class SistemaEmergencia {
         Dijkstra.Resultado rotaAmbulancia = calcularRotaAmbulanciaParaPaciente(ambulancia, paciente);
         if (!rotaAmbulancia.temCaminho()) {
             return new AtendimentoResultado(paciente, ambulancia, rotaAmbulancia, semHospital,
-                    "Ambulância localizada, mas sem rota possível até o paciente.");
+                    "VIAS BLOQUEADAS: Nenhuma alternativa encontrada para o destino.");
         }
 
-        AEstrela.Resultado rotaHospital = selecionarHospitalDestino(paciente);
+AEstrela.Resultado rotaHospital = selecionarHospitalDestino(paciente);
+
         String mensagem;
         if (rotaHospital.temCaminho()) {
             mensagem = "Ocorrência atendida: ambulância e hospital designados.";
@@ -251,12 +252,11 @@ public class SistemaEmergencia {
             if (temHospital && todosLotados) {
                 mensagem = "ATENÇÃO: Todos os hospitais estão com lotação máxima! Paciente não pode ser admitido.";
             } else {
-                mensagem = "Rota até o paciente calculada, mas nenhum hospital disponível ou alcançável.";
+                mensagem = "VIAS BLOQUEADAS ou SEM ROTAS: Nenhum hospital disponível ou alcançável para o destino.";
             }
         }
 
         return new AtendimentoResultado(paciente, ambulancia, rotaAmbulancia, rotaHospital, mensagem);
-    }
 
     /**
      * Etapa 1 — Registra uma ocorrência de emergência (RF05, RN05).

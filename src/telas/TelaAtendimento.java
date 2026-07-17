@@ -128,12 +128,16 @@ public class TelaAtendimento extends JDialog {
 
         double menorCusto = Double.MAX_VALUE;
         Ambulancia melhorAmb = null;
+        boolean temAmbDisponivel = false;
+        boolean temRotaViavel = false;
 
         for (Ambulancia amb : ambulancias) {
             if (amb.isDisponivel() && amb.getLocalizacaoAtual() != null) {
+                temAmbDisponivel = true;
                 Dijkstra.Resultado res = Dijkstra.encontrarMenorCaminho(
                         grafo, amb.getLocalizacaoAtual(), local);
                 if (res.temCaminho() && res.getCustoTotal() < menorCusto) {
+                    temRotaViavel = true;
                     menorCusto = res.getCustoTotal();
                     melhorAmb = amb;
                 }
@@ -144,6 +148,9 @@ public class TelaAtendimento extends JDialog {
             String eta = sistema != null ? sistema.estimarTempoChegada(menorCusto) : String.format("%.0f min", menorCusto);
             lblEtaPreview.setText("🚑 Ambulância #" + melhorAmb.getId() + " em ~" + eta);
             lblEtaPreview.setForeground(new Color(40, 100, 40));
+        } else if (temAmbDisponivel && !temRotaViavel) {
+            lblEtaPreview.setText("❌ VIAS BLOQUEADAS: Nenhuma alternativa encontrada para o destino.");
+            lblEtaPreview.setForeground(new Color(180, 40, 40));
         } else {
             lblEtaPreview.setText("⚠️ Nenhuma ambulância disponível no momento");
             lblEtaPreview.setForeground(new Color(180, 80, 0));
@@ -183,13 +190,25 @@ public class TelaAtendimento extends JDialog {
         else if (urgencia.startsWith("Baixa")) nivel = NivelUrgencia.BAIXA;
 
         int pacienteId = 100 + (int)(Math.random() * 9000);
-        Paciente paciente = new Paciente(pacienteId, "Paciente", 
+        Paciente paciente = new Paciente(pacienteId, "",
                 localAcidente.getLatitude(), localAcidente.getLongitude(),
                 nivel, descricao);
 
         SistemaEmergencia.AtendimentoResultado atendimento = null;
         if (sistema != null) {
             atendimento = sistema.registrarOcorrencia(paciente);
+        }
+
+        // Verifica se o atendimento retornou mensagem de vias bloqueadas
+        if (atendimento != null && !atendimento.isSucesso()) {
+            String msg = atendimento.getMensagem();
+            if (msg != null && msg.contains("VIAS BLOQUEADAS")) {
+                JOptionPane.showMessageDialog(this, 
+                    "❌ " + msg, 
+                    "Vias Bloqueadas", JOptionPane.ERROR_MESSAGE);
+                telaPrincipal.adicionarLog("❌ " + msg, "alerta");
+                return;
+            }
         }
 
         Ambulancia ambulanciaEscolhida = null;
@@ -202,7 +221,9 @@ public class TelaAtendimento extends JDialog {
         if (atendimento != null && atendimento.isSucesso()) {
             ambulanciaEscolhida = atendimento.getAmbulancia();
             List<Vertice> caminhoHospital = atendimento.getRotaHospital().getCaminho();
-            hospitalEscolhido = (Hospital) caminhoHospital.get(caminhoHospital.size() - 1);
+            if (caminhoHospital != null && !caminhoHospital.isEmpty()) {
+                hospitalEscolhido = (Hospital) caminhoHospital.get(caminhoHospital.size() - 1);
+            }
             rotaAteAcidente = atendimento.getRotaAmbulancia().getCaminho();
             rotaAteHospital = atendimento.getRotaHospital().getCaminho();
             custoAmbulancia = atendimento.getRotaAmbulancia().getCustoTotal();
@@ -211,9 +232,11 @@ public class TelaAtendimento extends JDialog {
 
         // Fallback com Dijkstra
         if (ambulanciaEscolhida == null) {
+            boolean temAmbDisponivel = false;
             double menorCusto = Double.MAX_VALUE;
             for (Ambulancia amb : ambulancias) {
                 if (amb.isDisponivel() && amb.getLocalizacaoAtual() != null) {
+                    temAmbDisponivel = true;
                     Dijkstra.Resultado resultado = Dijkstra.encontrarMenorCaminho(
                             grafo, amb.getLocalizacaoAtual(), localAcidente);
                     if (resultado.temCaminho() && resultado.getCustoTotal() < menorCusto) {
@@ -223,6 +246,15 @@ public class TelaAtendimento extends JDialog {
                         custoAmbulancia = resultado.getCustoTotal();
                     }
                 }
+            }
+
+            // Se tem ambulância disponível mas nenhuma conseguiu rota → vias bloqueadas
+            if (ambulanciaEscolhida == null && temAmbDisponivel) {
+                JOptionPane.showMessageDialog(this, 
+                    "❌ VIAS BLOQUEADAS: Nenhuma alternativa encontrada para o destino.", 
+                    "Vias Bloqueadas", JOptionPane.ERROR_MESSAGE);
+                telaPrincipal.adicionarLog("❌ VIAS BLOQUEADAS: Nenhuma alternativa encontrada para o destino.", "alerta");
+                return;
             }
 
             double menorCustoHosp = Double.MAX_VALUE;
@@ -290,10 +322,13 @@ public class TelaAtendimento extends JDialog {
         double custoTotal = custoAmbulancia + custoHospital;
         String etaTotal = sistema != null ? sistema.estimarTempoChegada(custoTotal) : String.format("%.0f min", custoTotal);
 
-        // PASSO 4: Salva a rota no mapa (destaca a rota ANTES da ambulância começar a se mover)
+        // PASSO 4: Mostra o bonequinho do paciente no mapa
+        telaPrincipal.getMapa().adicionarPaciente(localAcidente);
+
+        // PASSO 5: Salva a rota no mapa (destaca a rota ANTES da ambulância começar a se mover)
         telaPrincipal.definirRotaOcorrencia(new ArrayList<>(rotaCompleta));
 
-        // PASSO 5: Log com ETA
+        // PASSO 6: Log com ETA
         telaPrincipal.adicionarLog("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "titulo");
         telaPrincipal.adicionarLog("🚨 OCORRÊNCIA DISPARADA!", "alerta");
         telaPrincipal.adicionarLog("   Local: " + localAcidente.getNome() + " (" + urgencia.split(" ")[0] + ")", "info");
@@ -307,7 +342,11 @@ public class TelaAtendimento extends JDialog {
         final Hospital hospFinal = hospitalEscolhido;
         final Ambulancia ambFinal = ambulanciaEscolhida;
 
-        telaPrincipal.animarDespacho(ambulanciaEscolhida, rotaCompleta, () -> {
+telaPrincipal.animarDespacho(ambulanciaEscolhida, rotaCompleta, () -> {
+            
+            // Remove o bonequinho do paciente do mapa assim que o resgate é concluído
+            telaPrincipal.getMapa().removerPaciente(localAcidente);
+            
             telaPrincipal.adicionarLog("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "titulo");
             telaPrincipal.adicionarLog("✅ RESGATE CONCLUÍDO!", "sucesso");
             telaPrincipal.adicionarLog("   🚑 Ambulância #" + ambFinal.getId() + " chegou em: " + hospFinal.getNome(), "info");

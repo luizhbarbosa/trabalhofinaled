@@ -173,7 +173,7 @@ public class TelaPrincipal extends JFrame {
      * Anima o deslocamento da ambulância percorrendo passo a passo uma lista de vértices no mapa.
      */
     // 1. Mantém o método original para compatibilidade
-    public void animarDespacho(Ambulancia amb, java.util.List<Vertice> rotaCompleta, Runnable aoTerminar) {
+  public void animarDespacho(Ambulancia amb, java.util.List<Vertice> rotaCompleta, Runnable aoTerminar) {
         animarDespacho(amb, rotaCompleta, true, aoTerminar);
     }
 
@@ -193,11 +193,13 @@ public class TelaPrincipal extends JFrame {
         }
 
         javax.swing.Timer timer = new javax.swing.Timer(25, null);
+        boolean[] pacienteRemovido = {false};
 
         timer.addActionListener(new java.awt.event.ActionListener() {
             int indiceTrecho = 0;
             double progresso = 0.0;
             final double VELOCIDADE = 0.05;
+            final int indicePaciente = (localPaciente != null) ? rotaCompleta.indexOf(localPaciente) : -1;
 
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -209,6 +211,13 @@ public class TelaPrincipal extends JFrame {
 
                 amb.setPosicaoVisual(latAtual, lonAtual);
                 mapa.repaint();
+
+                // Remove o bonequinho quando a ambulância passa pelo paciente
+                if (!pacienteRemovido[0] && indicePaciente >= 0 && indiceTrecho >= indicePaciente) {
+                    pacienteRemovido[0] = true;
+                    mapa.removerPaciente(localPaciente);
+                    adicionarLog("🚑 Ambulância #" + amb.getId() + " chegou ao paciente. Seguindo para o hospital...", "info");
+                }
 
                 progresso += VELOCIDADE;
 
@@ -294,7 +303,7 @@ public class TelaPrincipal extends JFrame {
                     adicionarLog("✅ Rota atual já é a mais eficiente. Nenhuma alteração necessária.", "info");
                 }
             } else {
-                adicionarLog("❌ Não foi possível encontrar uma rota alternativa para o destino.", "alerta");
+                adicionarLog("❌ VIAS BLOQUEADAS: Nenhuma alternativa encontrada para o destino.", "alerta");
             }
             return;
         }
@@ -342,7 +351,7 @@ public class TelaPrincipal extends JFrame {
                 String eta = sistema.estimarTempoChegada(novaRota.getCustoTotal());
                 adicionarLog("🔄 Rota recalculada. ETA atual: ~" + eta, "info");
             } else {
-                adicionarLog("❌ Sem rota alternativa disponível para o destino.", "alerta");
+                adicionarLog("❌ VIAS BLOQUEADAS: Nenhuma alternativa encontrada para o destino.", "alerta");
             }
         }
     }
