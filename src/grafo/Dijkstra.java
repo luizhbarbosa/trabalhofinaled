@@ -63,7 +63,7 @@ public class Dijkstra {
      * O algoritmo considera o peso efetivo das arestas, que pode ser infinito para
      * vias bloqueadas ou multiplicado para vias congestionadas.
      * <p>
-     * Usa a lista de adjacência do grafo (grafo.getArestasSaida) em vez de percorrer
+     * Usa a lista de adjacência do grafo (grafo.getAdjacencias) em vez de percorrer
      * todas as arestas a cada vértice processado, garantindo complexidade O(E log V)
      * em vez de O(V×E) (RNF04).
      *
@@ -117,7 +117,7 @@ public class Dijkstra {
             }
 
             // Explora apenas as arestas que partem do vértice atual (lista de adjacência)
-            for (Aresta aresta : grafo.getArestasSaida(atual)) {
+            for (Aresta aresta : grafo.getAdjacencias(atual)) {
                 Vertice vizinho = aresta.getDestino();
                 double pesoEfetivo = aresta.getPesoEfetivo();
 

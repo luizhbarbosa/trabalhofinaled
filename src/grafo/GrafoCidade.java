@@ -1,6 +1,7 @@
 package grafo;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,8 +89,18 @@ public List<Hospital> getHospitais() {
      * @return lista de arestas que saem do vértice, ou lista vazia se o vértice não existir
      */
     public List<Aresta> getArestasSaida(Vertice vertice) {
+        return getAdjacencias(vertice);
+    }
+
+    /**
+     * Retorna as arestas adjacentes que saem de um vértice.
+     *
+     * @param vertice vértice de origem
+     * @return lista de arestas que saem do vértice, ou lista vazia se não houver adjacências
+     */
+    public List<Aresta> getAdjacencias(Vertice vertice) {
         if (vertice == null || !adjacencias.containsKey(vertice.getId())) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
         return new ArrayList<>(adjacencias.get(vertice.getId()));
     }

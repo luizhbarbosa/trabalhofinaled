@@ -142,9 +142,9 @@ public class Vertice {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Vertice vertice = (Vertice) o;
-        return id == vertice.id;
+        if (!(o instanceof Vertice)) return false;
+        Vertice outro = (Vertice) o;
+        return id == outro.id;
     }
 
     @Override

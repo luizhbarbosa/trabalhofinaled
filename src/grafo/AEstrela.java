@@ -64,7 +64,7 @@ public class AEstrela {
      * A heurística utilizada é a distância euclidiana entre vértices
      * (em km, convertida para minutos assumindo velocidade média de 40 km/h).
      * <p>
-     * Usa a lista de adjacência do grafo (grafo.getArestasSaida) em vez de percorrer
+     * Usa a lista de adjacência do grafo (grafo.getAdjacencias) em vez de percorrer
      * todas as arestas a cada vértice processado, garantindo complexidade O(E log V)
      * em vez de O(V×E) (RNF04).
      *
@@ -116,7 +116,7 @@ public class AEstrela {
             fechados.add(atual);
 
             // Explora apenas as arestas que partem do vértice atual (lista de adjacência)
-            for (Aresta aresta : grafo.getArestasSaida(atual)) {
+            for (Aresta aresta : grafo.getAdjacencias(atual)) {
                 double pesoEfetivo = aresta.getPesoEfetivo();
 
                 // Ignora vias bloqueadas
