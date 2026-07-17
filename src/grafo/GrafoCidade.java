@@ -118,8 +118,30 @@ public List<Hospital> getHospitais() {
         return new ArrayList<>(arestas);
     }
 
-    public Vertice getVerticePorId(int id) {
+        public Vertice getVerticePorId(int id) {
         return vertices.get(id);
+    }
+
+    /**
+     * Remove um vértice do grafo, junto com todas as arestas que
+     * partem dele ou chegam nele (evita arestas "fantasma" apontando
+     * para um vértice inexistente).
+     *
+     * @param vertice vértice a remover
+     * @return true se removido, false se o vértice não existia
+     */
+    public boolean removerVertice(Vertice vertice) {
+        if (vertice == null || !vertices.containsKey(vertice.getId())) {
+            return false;
+        }
+        int id = vertice.getId();
+        arestas.removeIf(a -> a.getOrigem().getId() == id || a.getDestino().getId() == id);
+        for (List<Aresta> lista : adjacencias.values()) {
+            lista.removeIf(a -> a.getDestino().getId() == id);
+        }
+        adjacencias.remove(id);
+        vertices.remove(id);
+        return true;
     }
 
     @Override

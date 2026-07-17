@@ -191,6 +191,16 @@ public class SistemaEmergencia {
         public String getMensagem() { return mensagem; }
 
         public boolean isSucesso() {
+            return ambulancia != null 
+                && rotaAmbulancia != null && rotaAmbulancia.temCaminho()
+                && rotaHospital != null && rotaHospital.temCaminho();
+        }
+
+        /**
+         * Verifica se a ambulância foi encontrada e tem rota até o paciente,
+         * independentemente de haver hospital disponível.
+         */
+        public boolean isAmbulanciaDespachada() {
             return ambulancia != null && rotaAmbulancia != null && rotaAmbulancia.temCaminho();
         }
     }
@@ -224,13 +234,29 @@ public class SistemaEmergencia {
                     "VIAS BLOQUEADAS: Nenhuma alternativa encontrada para o destino.");
         }
 
-        AEstrela.Resultado rotaHospital = selecionarHospitalDestino(paciente);
-        String mensagem = rotaHospital.temCaminho()
-                ? "Ocorrência atendida: ambulância e hospital designados."
-                : "VIAS BLOQUEADAS: Nenhuma alternativa encontrada para o destino.";
+AEstrela.Resultado rotaHospital = selecionarHospitalDestino(paciente);
+
+        String mensagem;
+        if (rotaHospital.temCaminho()) {
+            mensagem = "Ocorrência atendida: ambulância e hospital designados.";
+        } else {
+            // Verifica se existem hospitais cadastrados, mas todos lotados
+            boolean temHospital = !hospitais.isEmpty();
+            boolean todosLotados = true;
+            for (Hospital h : hospitais) {
+                if (h.isDisponivel()) {
+                    todosLotados = false;
+                    break;
+                }
+            }
+            if (temHospital && todosLotados) {
+                mensagem = "ATENÇÃO: Todos os hospitais estão com lotação máxima! Paciente não pode ser admitido.";
+            } else {
+                mensagem = "VIAS BLOQUEADAS ou SEM ROTAS: Nenhum hospital disponível ou alcançável para o destino.";
+            }
+        }
 
         return new AtendimentoResultado(paciente, ambulancia, rotaAmbulancia, rotaHospital, mensagem);
-    }
 
     /**
      * Etapa 1 — Registra uma ocorrência de emergência (RF05, RN05).
