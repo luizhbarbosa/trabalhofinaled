@@ -344,17 +344,17 @@ public class PainelMapa extends JPanel {
             g2.fillRect(0, 0, getWidth(), getHeight());
             
             g2.setColor(Color.WHITE);
-            g2.setFont(new Font("Segoe UI", Font.BOLD, 28));
+            g2.setFont(new Font("Dialog", Font.BOLD, 28));
             String titulo = "🚑 SISTEMA DE EMERGÊNCIA SAMU";
             FontMetrics fm = g2.getFontMetrics();
             g2.drawString(titulo, (getWidth() - fm.stringWidth(titulo)) / 2, getHeight() / 2 - 40);
             
-            g2.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-            String subtitulo = "Clique em 'Iniciar Simulação' para carregar o mapa";
+            g2.setFont(new Font("Dialog", Font.PLAIN, 18));
+            String subtitulo = "Clique no botão 'Iniciar' para começar";
             fm = g2.getFontMetrics();
             g2.drawString(subtitulo, (getWidth() - fm.stringWidth(subtitulo)) / 2, getHeight() / 2 + 10);
             
-            g2.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            g2.setFont(new Font("Dialog", Font.PLAIN, 13));
             String dica = "💡 Dica: Após iniciar, clique nas ruas para alterar o tráfego ou nos hospitais para ajustar capacidade";
             fm = g2.getFontMetrics();
             g2.drawString(dica, (getWidth() - fm.stringWidth(dica)) / 2, getHeight() / 2 + 50);
@@ -507,27 +507,31 @@ public class PainelMapa extends JPanel {
             if (v instanceof Hospital) {
                 desenharPredioHospital(g2, x, y);
             } else if (v.getTipo() == TipoVertice.BASE_SAMU) {
-                // Desenha um ícone de casa 🏠 para representar a Base SAMU
+                // Desenha um ícone profissional de base SAMU com estrela da vida
+                // Sombra
+                g2.setColor(new Color(0, 0, 0, 30));
+                g2.fillOval(x - 10, y + 6, 20, 5);
+                
+                // Círculo base azul escuro
                 g2.setColor(new Color(15, 32, 67));
-                // Telhado (triângulo)
-                Polygon telhado = new Polygon(
-                    new int[]{x - 10, x + 10, x},
-                    new int[]{y + 2, y + 2, y - 10}, 3
-                );
-                g2.fill(telhado);
-                g2.setColor(new Color(200, 160, 60));
-                g2.fill(telhado);
-                // Corpo da casa
-                g2.setColor(new Color(40, 60, 100));
-                g2.fillRect(x - 8, y, 16, 12);
-                // Porta
-                g2.setColor(new Color(180, 120, 40));
-                g2.fillRect(x - 3, y + 4, 6, 8);
-                // Cruz vermelha no telhado (símbolo SAMU)
+                g2.fillOval(x - 10, y - 10, 20, 20);
+                g2.setColor(new Color(30, 60, 110));
+                g2.setStroke(new BasicStroke(1.5f));
+                g2.drawOval(x - 10, y - 10, 20, 20);
+                
+                // Círculo interno branco
+                g2.setColor(Color.WHITE);
+                g2.fillOval(x - 6, y - 6, 12, 12);
+                
+                // Cruz vermelha (símbolo SAMU/emergência)
                 g2.setColor(new Color(220, 53, 69));
-                g2.setStroke(new BasicStroke(2f));
-                g2.drawLine(x - 2, y - 7, x + 2, y - 3);
-                g2.drawLine(x - 2, y - 3, x + 2, y - 7);
+                g2.setStroke(new BasicStroke(2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.drawLine(x, y - 4, x, y + 4);
+                g2.drawLine(x - 4, y, x + 4, y);
+                
+                // Pequeno detalhe brilhante
+                g2.setColor(new Color(255, 255, 255, 80));
+                g2.fillOval(x - 3, y - 7, 4, 3);
             } else {
                 g2.setColor(new Color(80, 85, 90));
                 g2.fillOval(x - 5, y - 5, 10, 10);
@@ -564,6 +568,28 @@ public class PainelMapa extends JPanel {
         g2.setColor(new Color(220, 53, 69));
         g2.fillRect(x - 1, y - 9, 2, 6);
         g2.fillRect(x - 3, y - 7, 6, 2);
+    }
+
+    /**
+     * Desenha o ícone da Base SAMU na legenda (versão menor para caber no espaço da legenda).
+     */
+    private void desenharBaseSamuLegenda(Graphics2D g2, int x, int y) {
+        // Círculo base azul escuro
+        g2.setColor(new Color(15, 32, 67));
+        g2.fillOval(x - 7, y - 7, 14, 14);
+        g2.setColor(new Color(30, 60, 110));
+        g2.setStroke(new BasicStroke(1f));
+        g2.drawOval(x - 7, y - 7, 14, 14);
+        
+        // Círculo interno branco
+        g2.setColor(Color.WHITE);
+        g2.fillOval(x - 4, y - 4, 8, 8);
+        
+        // Cruz vermelha
+        g2.setColor(new Color(220, 53, 69));
+        g2.setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2.drawLine(x, y - 3, x, y + 3);
+        g2.drawLine(x - 3, y, x + 3, y);
     }
 
     private void desenharAmbulancias(Graphics2D g2, double minLon, double maxLon, double minLat, double maxLat, int largura, int altura, int margem) {
@@ -668,7 +694,7 @@ public class PainelMapa extends JPanel {
         int lx = 15;
         int ly = 15;
         int lw = 195;
-        int lh = 175;
+        int lh = 200;
 
         g2.setColor(new Color(255, 255, 255, 230));
         g2.fillRoundRect(lx, ly, lw, lh, 8, 8);
@@ -699,6 +725,11 @@ public class PainelMapa extends JPanel {
         desenharPredioHospital(g2, lx + 16, ly + 150);
         g2.setColor(COR_TEXTO);
         g2.drawString("Hospital / UPA", lx + 34, ly + 154);
+
+        // Ícone Base SAMU
+        desenharBaseSamuLegenda(g2, lx + 16, ly + 172);
+        g2.setColor(COR_TEXTO);
+        g2.drawString("Base SAMU", lx + 34, ly + 176);
     }
 
     private void desenharItemLegenda(Graphics2D g2, int x, int y, Color cor, String texto, boolean isLinha) {

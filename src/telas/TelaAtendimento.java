@@ -161,6 +161,9 @@ public class TelaAtendimento extends JDialog {
         }
         if (locais.isEmpty()) return grafo.getVertices().toArray(new Vertice[0]);
         
+        // Ordena em ordem alfabética pelo nome
+        locais.sort((a, b) -> a.getNome().compareToIgnoreCase(b.getNome()));
+        
         return locais.toArray(new Vertice[0]);
     }
 
@@ -299,17 +302,48 @@ public class TelaAtendimento extends JDialog {
         telaPrincipal.adicionarLog("   🏥 Destino: " + hospitalEscolhido.getNome() + " (ETA total: ~" + etaTotal + ")", "info");
         telaPrincipal.adicionarLog("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n", "titulo");
 
+        // Guarda a base de origem para retorno após o atendimento
+        final Vertice baseOrigemFinal = baseOrigem;
         final Hospital hospFinal = hospitalEscolhido;
         final Ambulancia ambFinal = ambulanciaEscolhida;
 
         telaPrincipal.animarDespacho(ambulanciaEscolhida, rotaCompleta, () -> {
-            ambFinal.finalizarAtendimento();
-            
             telaPrincipal.adicionarLog("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "titulo");
             telaPrincipal.adicionarLog("✅ RESGATE CONCLUÍDO!", "sucesso");
-            telaPrincipal.adicionarLog("   🚑 Ambulância #" + ambFinal.getId() + " em: " + hospFinal.getNome(), "info");
+            telaPrincipal.adicionarLog("   🚑 Ambulância #" + ambFinal.getId() + " chegou em: " + hospFinal.getNome(), "info");
             telaPrincipal.adicionarLog("   🏥 Vagas restantes: " + (hospFinal.getCapacidadeMaxima() - hospFinal.getOcupacaoAtual()), "info");
             telaPrincipal.adicionarLog("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n", "titulo");
+            
+            // Após entrega, calcula rota de volta para a base de origem
+            Dijkstra.Resultado rotaVolta = Dijkstra.encontrarMenorCaminho(
+                    grafo, hospFinal, baseOrigemFinal);
+            
+            if (rotaVolta.temCaminho() && rotaVolta.getCaminho().size() > 1) {
+                String etaVolta = sistema != null ? sistema.estimarTempoChegada(rotaVolta.getCustoTotal()) : 
+                    String.format("%.0f min", rotaVolta.getCustoTotal());
+                
+                telaPrincipal.adicionarLog("🔄 Ambulância #" + ambFinal.getId() + " retornando à base: " + baseOrigemFinal.getNome(), "info");
+                telaPrincipal.adicionarLog("   ⏱️ ETA de retorno: ~" + etaVolta, "info");
+                
+                // Remove o destaque azul da rota antes de iniciar o retorno
+                telaPrincipal.getMapa().setRotaDestacada(null);
+                
+                telaPrincipal.animarDespacho(ambFinal, rotaVolta.getCaminho(), () -> {
+                    ambFinal.setLocalizacaoAtual(baseOrigemFinal);
+                    ambFinal.finalizarAtendimento();
+                    
+                    telaPrincipal.adicionarLog("🏠 Ambulância #" + ambFinal.getId() + " retornou à base: " + baseOrigemFinal.getNome(), "sucesso");
+                    telaPrincipal.adicionarLog("   ✅ Ambulância disponível para novas ocorrências.", "sucesso");
+                    
+                    telaPrincipal.getMapa().repaint();
+                });
+            } else {
+                // Se não conseguir calcular rota de volta, marca como disponível onde está
+                ambFinal.setLocalizacaoAtual(hospFinal);
+                ambFinal.finalizarAtendimento();
+                telaPrincipal.adicionarLog("⚠️ Ambulância #" + ambFinal.getId() + " sem rota de retorno à base. Permanece em: " + hospFinal.getNome(), "alerta");
+                telaPrincipal.getMapa().repaint();
+            }
             
             telaPrincipal.getMapa().repaint();
         });

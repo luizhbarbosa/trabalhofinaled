@@ -29,7 +29,7 @@ public class TelaPrincipal extends JFrame {
 
     private JButton btnIniciar;
     private JButton btnNovaOcorrencia;
-    private JButton btnRecalcular;
+    //private JButton btnRecalcular;
     private JButton btnCadastrarHospital;
     private JButton btnCadastrarVia;
 
@@ -62,21 +62,21 @@ public class TelaPrincipal extends JFrame {
 
         // Painel superior
         JPanel painelSuperior = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
-        painelSuperior.setBackground(new Color(30, 45, 60));
+        painelSuperior.setBackground(new Color(30, 45, 60)); 
 
         btnIniciar = new JButton("▶️ Iniciar");
         btnNovaOcorrencia = new JButton("🆘 Ocorrência");
-        btnRecalcular = new JButton("🔄 Recalcular");
-        btnCadastrarHospital = new JButton("🏥 +Hospital");
-        btnCadastrarVia = new JButton("🛣️ +Via");
+        //btnRecalcular = new JButton("🔄 Recalcular");
+        btnCadastrarHospital = new JButton("🏥 Cadastrar Hospital");
+        btnCadastrarVia = new JButton("🛣️  Cadastrar Via");
 
         // Estilo dos botões
-        Font btnFont = new Font("Segoe UI", Font.BOLD, 12);
+        Font btnFont = new Font("Dialog", Font.BOLD, 12);
         Color btnFg = Color.WHITE;
         Color btnBg = new Color(50, 75, 100);
         Dimension btnSize = new Dimension(160, 32);
 
-        for (JButton btn : new JButton[]{btnIniciar, btnNovaOcorrencia, btnRecalcular, btnCadastrarHospital, btnCadastrarVia}) {
+        for (JButton btn : new JButton[]{btnIniciar, btnNovaOcorrencia/* , btnRecalcular*/, btnCadastrarHospital, btnCadastrarVia}) {
             btn.setFont(btnFont);
             btn.setForeground(btnFg);
             btn.setBackground(btnBg);
@@ -88,19 +88,20 @@ public class TelaPrincipal extends JFrame {
             ));
         }
 
-        // Destaque para o botão de recalcular
+        // Destaque para o botão de iniciar (verde) e ocorrência (vermelho)
+        btnIniciar.setBackground(new Color(40, 167, 69));
         btnNovaOcorrencia.setBackground(new Color(180, 40, 50));
-        btnRecalcular.setBackground(new Color(200, 130, 20));
+        //btnRecalcular.setBackground(new Color(200, 130, 20));
 
         btnIniciar.addActionListener(e -> iniciarSimulacao());
         btnNovaOcorrencia.addActionListener(e -> abrirTelaAtendimento());
-        btnRecalcular.addActionListener(e -> recalcularRota());
+        //btnRecalcular.addActionListener(e -> recalcularRota());
         btnCadastrarHospital.addActionListener(e -> abrirTelaCadastroHospital());
         btnCadastrarVia.addActionListener(e -> abrirTelaCadastroVia());
 
         painelSuperior.add(btnIniciar);
         painelSuperior.add(btnNovaOcorrencia);
-        painelSuperior.add(btnRecalcular);
+        //painelSuperior.add(btnRecalcular);
         painelSuperior.add(btnCadastrarHospital);
         painelSuperior.add(btnCadastrarVia);
 
@@ -148,7 +149,7 @@ public class TelaPrincipal extends JFrame {
             "📋 Log da Simulação",
             javax.swing.border.TitledBorder.LEFT,
             javax.swing.border.TitledBorder.TOP,
-            new Font("Segoe UI", Font.BOLD, 12),
+            new Font("Dialog", Font.BOLD, 12),
             new Color(40, 60, 80)
         ));
         scroll.setPreferredSize(new Dimension(380, 0));
@@ -171,15 +172,25 @@ public class TelaPrincipal extends JFrame {
     /**
      * Anima o deslocamento da ambulância percorrendo passo a passo uma lista de vértices no mapa.
      */
+    // 1. Mantém o método original para compatibilidade
     public void animarDespacho(Ambulancia amb, java.util.List<Vertice> rotaCompleta, Runnable aoTerminar) {
+        animarDespacho(amb, rotaCompleta, true, aoTerminar);
+    }
+
+    // 2. Método principal atualizado
+    public void animarDespacho(Ambulancia amb, java.util.List<Vertice> rotaCompleta, boolean destacarRota, Runnable aoTerminar) {
         if (rotaCompleta == null || rotaCompleta.size() < 2) {
             if (aoTerminar != null) aoTerminar.run();
             return;
         }
 
-        // Guarda a rota para destacar no mapa
-        this.ultimaRotaCompleta = new ArrayList<>(rotaCompleta);
-        mapa.setRotaDestacada(this.ultimaRotaCompleta);
+        // Se for para destacar (ida), atualiza o mapa com a nova rota.
+        // Se for false (volta), não faz NADA com o mapa. 
+        // Assim, a rota azul do resgate continua desenhada intocada!
+        if (destacarRota) {
+            this.ultimaRotaCompleta = new ArrayList<>(rotaCompleta);
+            mapa.setRotaDestacada(this.ultimaRotaCompleta);
+        }
 
         javax.swing.Timer timer = new javax.swing.Timer(25, null);
 
@@ -207,6 +218,9 @@ public class TelaPrincipal extends JFrame {
 
                     if (indiceTrecho >= rotaCompleta.size() - 1) {
                         timer.stop();
+                        
+                        // Removi o código que apagava a rota aqui do final também!
+                        // Agora o azul só some quando uma NOVA ocorrência começar.
                         
                         Vertice destinoFinal = rotaCompleta.get(rotaCompleta.size() - 1);
                         amb.setLocalizacaoAtual(destinoFinal);
@@ -384,8 +398,8 @@ public class TelaPrincipal extends JFrame {
 
     private void abrirTelaAtendimento() {
         if (mapa.getGrafo() == null || mapa.getGrafo().getVertices().isEmpty()) {
-            adicionarLog("⚠️ Clique em 'Iniciar Simulação' antes de gerar ocorrências!", "alerta");
-            JOptionPane.showMessageDialog(this, "Clique em 'Iniciar Simulação' antes de gerar ocorrências!", "Aviso", JOptionPane.WARNING_MESSAGE);
+            adicionarLog("⚠️ Clique em 'Iniciar' antes de gerar ocorrências!", "alerta");
+            JOptionPane.showMessageDialog(this, "Clique em 'Iniciar' antes de gerar ocorrências!", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
