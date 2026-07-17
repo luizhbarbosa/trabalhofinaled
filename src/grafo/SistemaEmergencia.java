@@ -27,11 +27,12 @@ public class SistemaEmergencia {
      *
      * @param grafo o grafo da cidade
      */
-    public SistemaEmergencia(GrafoCidade grafo) {
-        this.grafo = grafo;
+    public SistemaEmergencia() {
+        this.grafo = new GrafoCidade();
         this.ambulancias = new ArrayList<>();
         this.hospitais = new ArrayList<>();
         this.pacientes = new ArrayList<>();
+        
     }
 
     // ==================== Cadastros (T-13 a T-16) ====================
@@ -157,8 +158,8 @@ public class SistemaEmergencia {
         if (maisProximo == null) return false;
 
         double tempoEstimado = (menorDistancia / 40.0) * 60.0; // minutos, 40 km/h
-        boolean ida = grafo.addAresta(new Aresta(maisProximo, paciente, tempoEstimado));
-        boolean volta = grafo.addAresta(new Aresta(paciente, maisProximo, tempoEstimado));
+        boolean ida = grafo.addAresta(new Aresta(maisProximo, paciente, tempoEstimado, StatusVia.LIVRE));
+        boolean volta = grafo.addAresta(new Aresta(paciente, maisProximo, tempoEstimado, StatusVia.LIVRE));
         return ida && volta;
     }
 
@@ -190,6 +191,16 @@ public class SistemaEmergencia {
         public String getMensagem() { return mensagem; }
 
         public boolean isSucesso() {
+            return ambulancia != null 
+                && rotaAmbulancia != null && rotaAmbulancia.temCaminho()
+                && rotaHospital != null && rotaHospital.temCaminho();
+        }
+
+        /**
+         * Verifica se a ambulância foi encontrada e tem rota até o paciente,
+         * independentemente de haver hospital disponível.
+         */
+        public boolean isAmbulanciaDespachada() {
             return ambulancia != null && rotaAmbulancia != null && rotaAmbulancia.temCaminho();
         }
     }
@@ -224,9 +235,25 @@ public class SistemaEmergencia {
         }
 
         AEstrela.Resultado rotaHospital = selecionarHospitalDestino(paciente);
-        String mensagem = rotaHospital.temCaminho()
-                ? "Ocorrência atendida: ambulância e hospital designados."
-                : "Rota até o paciente calculada, mas nenhum hospital disponível/alcançável.";
+        String mensagem;
+        if (rotaHospital.temCaminho()) {
+            mensagem = "Ocorrência atendida: ambulância e hospital designados.";
+        } else {
+            // Verifica se existem hospitais cadastrados, mas todos lotados
+            boolean temHospital = !hospitais.isEmpty();
+            boolean todosLotados = true;
+            for (Hospital h : hospitais) {
+                if (h.isDisponivel()) {
+                    todosLotados = false;
+                    break;
+                }
+            }
+            if (temHospital && todosLotados) {
+                mensagem = "ATENÇÃO: Todos os hospitais estão com lotação máxima! Paciente não pode ser admitido.";
+            } else {
+                mensagem = "Rota até o paciente calculada, mas nenhum hospital disponível ou alcançável.";
+            }
+        }
 
         return new AtendimentoResultado(paciente, ambulancia, rotaAmbulancia, rotaHospital, mensagem);
     }
@@ -428,10 +455,15 @@ public class SistemaEmergencia {
      * @return resultado da operação
      */
     public GerenciadorVias.Resultado atualizarStatusVia(Aresta aresta, StatusVia novoStatus) {
-        return switch (novoStatus) {
-            case BLOQUEADA -> GerenciadorVias.bloquearVia(grafo, aresta);
-            case CONGESTIONADA -> GerenciadorVias.congestionarVia(grafo, aresta);
-            case LIVRE -> GerenciadorVias.liberarVia(grafo, aresta);
-        };
+        switch (novoStatus) {
+            case BLOQUEADA:
+                return GerenciadorVias.bloquearVia(grafo, aresta);
+            case CONGESTIONADA:
+                return GerenciadorVias.congestionarVia(grafo, aresta);
+            case LIVRE:
+                return GerenciadorVias.liberarVia(grafo, aresta);
+            default:
+                return null;
+        }
     }
 }

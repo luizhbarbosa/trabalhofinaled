@@ -33,8 +33,6 @@ public class SeedDados {
         sistema.cadastrarHospital(new Hospital(1, "Hospital Central",      -12.970, -38.510, 80, 40));
         sistema.cadastrarHospital(new Hospital(2, "UPA Norte",             -12.920, -38.460, 30, 10));
         sistema.cadastrarHospital(new Hospital(3, "Hospital Sul",          -13.020, -38.530, 50, 25));
-        sistema.cadastrarHospital(new Hospital(4, "Pronto Socorro Leste",  -12.960, -38.440, 40, 38)); // quase lotado
-        sistema.cadastrarHospital(new Hospital(5, "Hospital Universitario",-12.990, -38.490, 100, 60));
     }
 
     // ==================== Bases SAMU ====================
@@ -76,8 +74,6 @@ public class SeedDados {
         Vertice h1    = grafo.getVerticePorId(1);
         Vertice h2    = grafo.getVerticePorId(2);
         Vertice h3    = grafo.getVerticePorId(3);
-        Vertice h4    = grafo.getVerticePorId(4);
-        Vertice h5    = grafo.getVerticePorId(5);
 
         Vertice b10   = grafo.getVerticePorId(10);
         Vertice b11   = grafo.getVerticePorId(11);
@@ -134,9 +130,7 @@ public class SeedDados {
         sistema.cadastrarViaBidirecional(v25, cA,  2.5);
         sistema.cadastrarViaBidirecional(v25, cD,  3.0);
         sistema.cadastrarViaBidirecional(v26, cD,  3.5);
-        sistema.cadastrarViaBidirecional(v26, h5,  2.0);
         sistema.cadastrarViaBidirecional(v27, cE,  3.0);
-        sistema.cadastrarViaBidirecional(v27, h4,  2.5);
 
         // Hospitais -> Cruzamentos/Bairros
         sistema.cadastrarViaBidirecional(h1, v20,  3.0);
@@ -145,9 +139,6 @@ public class SeedDados {
         sistema.cadastrarViaBidirecional(h2, cF,   3.0);
         sistema.cadastrarViaBidirecional(h3, v22,  2.0);
         sistema.cadastrarViaBidirecional(h3, cE,   3.5);
-        sistema.cadastrarViaBidirecional(h4, v23,  2.0);
-        sistema.cadastrarViaBidirecional(h5, cD,   2.5);
-        sistema.cadastrarViaBidirecional(h5, v26,  2.0);
     }
 
     // ==================== Ambulancias ====================
@@ -160,10 +151,9 @@ public class SeedDados {
         Vertice b12 = grafo.getVerticePorId(12); // Base SAMU Sul
         Vertice b13 = grafo.getVerticePorId(13); // Base SAMU Leste
 
-        sistema.cadastrarAmbulancia(new Ambulancia(1, b10));
-        sistema.cadastrarAmbulancia(new Ambulancia(2, b10));
-        sistema.cadastrarAmbulancia(new Ambulancia(3, b11));
-        sistema.cadastrarAmbulancia(new Ambulancia(4, b12));
-        sistema.cadastrarAmbulancia(new Ambulancia(5, b13));
+        sistema.cadastrarAmbulancia(new Ambulancia(1, b10));   // Base SAMU Centro
+        sistema.cadastrarAmbulancia(new Ambulancia(2, b11));   // Base SAMU Norte (mudado para não sobrepor)
+        sistema.cadastrarAmbulancia(new Ambulancia(3, b12));   // Base SAMU Sul
+        sistema.cadastrarAmbulancia(new Ambulancia(4, b13));   // Base SAMU Leste
     }
 }

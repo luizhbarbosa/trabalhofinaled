@@ -65,7 +65,7 @@ public class ComponentesConexos {
                     ", temHospital=" + temHospital() +
                     ", vertices=" + vertices.stream()
                             .map(Vertice::getNome)
-                            .toList() +
+                            .collect(java.util.stream.Collectors.toList()) +
                     '}';
         }
     }
@@ -96,7 +96,7 @@ public class ComponentesConexos {
         public List<Componente> getComponentesIsolados() {
             return componentes.stream()
                     .filter(Componente::estaIsolado)
-                    .toList();
+                    .collect(java.util.stream.Collectors.toList());
         }
 
         /**
