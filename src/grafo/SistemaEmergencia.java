@@ -221,13 +221,13 @@ public class SistemaEmergencia {
         Dijkstra.Resultado rotaAmbulancia = calcularRotaAmbulanciaParaPaciente(ambulancia, paciente);
         if (!rotaAmbulancia.temCaminho()) {
             return new AtendimentoResultado(paciente, ambulancia, rotaAmbulancia, semHospital,
-                    "Ambulância localizada, mas sem rota possível até o paciente.");
+                    "VIAS BLOQUEADAS: Nenhuma alternativa encontrada para o destino.");
         }
 
         AEstrela.Resultado rotaHospital = selecionarHospitalDestino(paciente);
         String mensagem = rotaHospital.temCaminho()
                 ? "Ocorrência atendida: ambulância e hospital designados."
-                : "Rota até o paciente calculada, mas nenhum hospital disponível/alcançável.";
+                : "VIAS BLOQUEADAS: Nenhuma alternativa encontrada para o destino.";
 
         return new AtendimentoResultado(paciente, ambulancia, rotaAmbulancia, rotaHospital, mensagem);
     }

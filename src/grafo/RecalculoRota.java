@@ -101,7 +101,7 @@ public class RecalculoRota {
                     Collections.emptyList(),
                     Double.POSITIVE_INFINITY,
                     true,
-                    "Via bloqueada. Nenhuma rota alternativa encontrada para o destino."
+                    "❌ VIAS BLOQUEADAS: Nenhuma alternativa encontrada para o destino."
             );
         }
 

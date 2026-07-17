@@ -22,6 +22,7 @@ public class PainelMapa extends JPanel {
     private List<Ambulancia> ambulancias = new ArrayList<>();
     private TelaPrincipal telaPrincipal;
     private List<Vertice> rotaDestacada = new ArrayList<>(); // rota da última ocorrência
+    private List<Vertice> pacientesNoMapa = new ArrayList<>(); // pacientes (bonequinhos) no mapa
 
     // Controles de Zoom e Navegação (Pan)
     private double fatorZoom = 1.0;
@@ -327,6 +328,32 @@ public class PainelMapa extends JPanel {
         repaint();
     }
 
+    /**
+     * Adiciona um paciente (bonequinho) ao mapa para ser desenhado.
+     */
+    public void adicionarPaciente(Vertice paciente) {
+        if (paciente != null && !pacientesNoMapa.contains(paciente)) {
+            pacientesNoMapa.add(paciente);
+            repaint();
+        }
+    }
+
+    /**
+     * Remove um paciente do mapa (quando o resgate é concluído).
+     */
+    public void removerPaciente(Vertice paciente) {
+        pacientesNoMapa.remove(paciente);
+        repaint();
+    }
+
+    /**
+     * Limpa todos os pacientes do mapa.
+     */
+    public void limparPacientes() {
+        pacientesNoMapa.clear();
+        repaint();
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -378,9 +405,56 @@ public class PainelMapa extends JPanel {
         desenharRuas(g2, minLon, maxLon, minLat, maxLat, largura, altura, margem);
         desenharRotaDestacada(g2, minLon, maxLon, minLat, maxLat, largura, altura, margem);
         desenharVertices(g2, minLon, maxLon, minLat, maxLat, largura, altura, margem);
+        desenharPacientes(g2, minLon, maxLon, minLat, maxLat, largura, altura, margem);
         desenharAmbulancias(g2, minLon, maxLon, minLat, maxLat, largura, altura, margem);
         desenharTextos(g2, minLon, maxLon, minLat, maxLat, largura, altura, margem);
         desenharLegenda(g2);
+    }
+
+    /**
+     * Desenha os pacientes (bonequinhos) no mapa no local da ocorrência.
+     */
+    private void desenharPacientes(Graphics2D g2, double minLon, double maxLon, double minLat, double maxLat, int largura, int altura, int margem) {
+        if (pacientesNoMapa == null || pacientesNoMapa.isEmpty()) return;
+
+        for (Vertice paciente : pacientesNoMapa) {
+            int x = converterX(paciente.getLongitude(), minLon, maxLon, largura, margem);
+            int y = converterY(paciente.getLatitude(), minLat, maxLat, altura, margem);
+
+            // Sombra
+            g2.setColor(new Color(0, 0, 0, 40));
+            g2.fillOval(x - 7, y + 8, 14, 4);
+
+            // Corpo (camiseta vermelha)
+            g2.setColor(new Color(220, 53, 69));
+            g2.fillOval(x - 6, y - 4, 12, 14);
+
+            // Cabeça (círculo)
+            g2.setColor(new Color(255, 200, 150));
+            g2.fillOval(x - 5, y - 12, 10, 10);
+
+            // Olhos
+            g2.setColor(Color.BLACK);
+            g2.fillOval(x - 3, y - 9, 2, 2);
+            g2.fillOval(x + 1, y - 9, 2, 2);
+
+            // Braços (linhas)
+            g2.setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g2.setColor(new Color(255, 200, 150));
+            g2.drawLine(x - 7, y + 1, x - 11, y + 6);   // braço esquerdo
+            g2.drawLine(x + 7, y + 1, x + 11, y + 6);   // braço direito
+
+            // Pernas (linhas)
+            g2.setColor(new Color(40, 50, 80));
+            g2.setStroke(new BasicStroke(2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g2.drawLine(x - 3, y + 9, x - 5, y + 15);   // perna esquerda
+            g2.drawLine(x + 3, y + 9, x + 5, y + 15);   // perna direita
+
+            // Círculo pulsante em volta (emergência)
+            g2.setStroke(new BasicStroke(2f));
+            g2.setColor(new Color(220, 53, 69, 120));
+            g2.drawOval(x - 12, y - 16, 24, 34);
+        }
     }
 
     /**
@@ -634,10 +708,18 @@ public class PainelMapa extends JPanel {
         g2.setFont(new Font("Segoe UI", Font.BOLD, 13));
 
         for (Vertice v : grafo.getVertices()) {
+            if (v.getTipo() == TipoVertice.PACIENTE) {
+                continue;
+            }
+
+            String texto = v.getNome();
+            if (texto == null || texto.trim().isEmpty()) {
+                continue;
+            }
+
             int x = converterX(v.getLongitude(), minLon, maxLon, largura, margem);
             int y = converterY(v.getLatitude(), minLat, maxLat, altura, margem);
 
-            String texto = v.getNome();
             int txtX = x + 11;
             int txtY = y + 5;
 
