@@ -1,0 +1,360 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+
+\begin{document}
+
+\title{Capacitação: Construindo um Encurtador de URLs com Node.js e Express}
+\author{}
+\date{}
+
+\maketitle
+
+\section{Estrutura da Capacitação (1 hora)}
+
+\subsection{Parte 1 --- Introdução (5 min)}
+
+\subsubsection{O problema}
+
+Pergunte:
+
+\begin{quote}
+Como o Bitly transforma uma URL enorme em algo pequeno?
+\end{quote}
+
+Exemplo:
+
+\begin{verbatim}
+https://www.youtube.com/watch?v=ABC123XYZ456
+\end{verbatim}
+
+vira
+
+\begin{verbatim}
+https://bit.ly/abc123
+\end{verbatim}
+
+Explique que o sistema:
+
+\begin{itemize}
+    \item Recebe uma URL;
+    \item Gera um código;
+    \item Salva a relação código $\rightarrow$ URL;
+    \item Redireciona quando alguém acessa o código.
+\end{itemize}
+
+\subsection{Parte 2 --- O que é uma API REST? (5 min)}
+
+Mostre:
+
+\begin{verbatim}
+Cliente
+   |
+   v
+Requisição HTTP
+   |
+   v
+Servidor
+   |
+   v
+Resposta HTTP
+\end{verbatim}
+
+Exemplos:
+
+\begin{verbatim}
+GET /users
+\end{verbatim}
+
+Buscar dados.
+
+\begin{verbatim}
+POST /users
+\end{verbatim}
+
+Criar dados.
+
+Explique rapidamente:
+
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+Método & Função \\
+\hline
+GET & Buscar \\
+POST & Criar \\
+PUT & Atualizar \\
+DELETE & Remover \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Parte 3 --- Criando o Projeto (10 min)}
+
+\subsubsection{Inicialização}
+
+\begin{verbatim}
+npm init -y
+\end{verbatim}
+
+\subsubsection{Instalação}
+
+\begin{verbatim}
+npm install express
+\end{verbatim}
+
+Mostre o que apareceu:
+
+\begin{itemize}
+    \item node\_modules
+    \item package.json
+    \item package-lock.json
+\end{itemize}
+
+\subsection{Parte 4 --- Criando o Servidor (10 min)}
+
+Arquivo:
+
+\begin{verbatim}
+const express = require("express");
+const app = express();
+
+app.listen(3000, () => {
+    console.log("Servidor rodando");
+});
+\end{verbatim}
+
+Explique:
+
+\begin{verbatim}
+express()
+\end{verbatim}
+
+Cria a aplicação.
+
+Porta:
+
+\begin{verbatim}
+app.listen(3000)
+\end{verbatim}
+
+Pergunte:
+
+\begin{quote}
+O navegador conversa com quem?
+\end{quote}
+
+Resposta:
+
+\begin{verbatim}
+localhost:3000
+\end{verbatim}
+
+\subsection{Parte 5 --- Primeira Rota (5 min)}
+
+\begin{verbatim}
+app.get("/", (req, res) => {
+    res.send("Olá mundo");
+});
+\end{verbatim}
+
+Explique:
+
+\begin{description}
+    \item[req] Requisição.
+    \item[res] Resposta.
+\end{description}
+
+Teste no navegador:
+
+\begin{verbatim}
+http://localhost:3000
+\end{verbatim}
+
+\subsection{Parte 6 --- Organizando Rotas (5 min)}
+
+Mostre o arquivo:
+
+\begin{verbatim}
+routes/Users.js
+\end{verbatim}
+
+\begin{verbatim}
+const router = express.Router();
+\end{verbatim}
+
+Explique:
+
+Antes:
+
+\begin{verbatim}
+app.get(...)
+app.post(...)
+app.get(...)
+\end{verbatim}
+
+Tudo no mesmo arquivo.
+
+Depois:
+
+\begin{verbatim}
+router.get(...)
+router.post(...)
+\end{verbatim}
+
+Mais organizado.
+
+\subsection{Parte 7 --- Criando o Encurtador (15 min)}
+
+\subsubsection{Rota POST}
+
+\begin{verbatim}
+router.post("/shorten", ...)
+\end{verbatim}
+
+Recebe:
+
+\begin{verbatim}
+{
+  "url": "https://google.com"
+}
+\end{verbatim}
+
+\subsubsection{Middleware}
+
+\begin{verbatim}
+app.use(express.json());
+\end{verbatim}
+
+Explique:
+
+Sem isso:
+
+\begin{verbatim}
+req.body
+\end{verbatim}
+
+vem vazio.
+
+\subsubsection{Validação}
+
+\begin{verbatim}
+if (!url)
+\end{verbatim}
+
+Explique a importância de validar entradas.
+
+\subsubsection{Gerando o Código}
+
+\begin{verbatim}
+console.log(
+    Math.random()
+        .toString(36)
+        .substring(2, 8)
+);
+\end{verbatim}
+
+Saídas possíveis:
+
+\begin{verbatim}
+ab12cd
+xk92lm
+qwerty
+\end{verbatim}
+
+\subsubsection{Banco em Memória}
+
+\begin{verbatim}
+const database = {};
+\end{verbatim}
+
+Exemplo:
+
+\begin{verbatim}
+database["abc123"] = "https://google.com";
+\end{verbatim}
+
+Resultado:
+
+\begin{verbatim}
+{
+   abc123: "https://google.com"
+}
+\end{verbatim}
+
+\subsubsection{Retorno}
+
+\begin{verbatim}
+res.json({
+    shortUrl: "http://localhost:3000/abc123"
+});
+\end{verbatim}
+
+Mostre no Postman ou Insomnia.
+
+\subsection{Parte 8 --- Redirecionamento (5 min)}
+
+\begin{verbatim}
+router.get("/:code")
+\end{verbatim}
+
+Quando acessar:
+
+\begin{verbatim}
+localhost:3000/abc123
+\end{verbatim}
+
+Busca:
+
+\begin{verbatim}
+database["abc123"]
+\end{verbatim}
+
+Se encontrar:
+
+\begin{verbatim}
+res.redirect(originalUrl);
+\end{verbatim}
+
+Explique o código HTTP 302.
+
+\section{Demonstração Final}
+
+\subsection{1. Criar URL}
+
+\begin{verbatim}
+POST /shorten
+\end{verbatim}
+
+Body:
+
+\begin{verbatim}
+{
+  "url": "https://www.google.com"
+}
+\end{verbatim}
+
+Resposta:
+
+\begin{verbatim}
+{
+  "shortUrl": "http://localhost:3000/abc123"
+}
+\end{verbatim}
+
+\subsection{2. Acessar}
+
+\begin{verbatim}
+http://localhost:3000/abc123
+\end{verbatim}
+
+Resultado:
+
+\begin{verbatim}
+Google
+\end{verbatim}
+
+\end{document}
